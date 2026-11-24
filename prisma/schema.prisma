@@ -1,0 +1,51 @@
+// Prisma schema — SYNDICATE Achievements
+// PostgreSQL via DATABASE_URL (Neon or any Postgres host).
+// Design notes:
+// - Result/format are stored as validated strings (enforced by Zod in the
+//   server actions) instead of DB enums, so the admin UI can evolve without
+//   a migration for every label tweak. Allowed values live in lib/validation.ts.
+// - Game rows cascade-delete with their Achievement: an achievement and its
+//   games are one record, they should never exist apart.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Achievement {
+  id                 Int      @id @default(autoincrement())
+  matchNumber        Int      @unique
+  opponent           String
+  opponentChannelUrl String?
+  result             String // "WIN" | "LOSS" (validated in app code)
+  finalScore         String // e.g. "2 – 1"
+  format             String // "BO1" | "BO3" | "BO5" (validated in app code)
+  date               DateTime @db.Date
+  mode               String
+  map                String
+  cardLine           String
+  games              Game[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([date])
+}
+
+model Game {
+  id            Int         @id @default(autoincrement())
+  achievementId Int
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  gameNumber    Int
+  scoreFor      Int
+  scoreAgainst  Int
+  result        String // "Victory" | "Defeat" (validated in app code)
+  screenshotUrl String
+
+  @@unique([achievementId, gameNumber])
+  @@index([achievementId])
+}

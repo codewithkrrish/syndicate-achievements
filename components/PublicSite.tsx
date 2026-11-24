@@ -1,0 +1,374 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AchievementDTO } from "@/lib/types";
+import { GUILD } from "@/lib/site";
+import { matchLabel } from "@/lib/format";
+import EmberCanvas from "./EmberCanvas";
+import SearchBar from "./SearchBar";
+import RecordCard from "./RecordCard";
+import MatchDetail from "./MatchDetail";
+import AboutView from "./AboutView";
+
+type View =
+  | { name: "list" }
+  | { name: "detail"; id: number }
+  | { name: "about" };
+
+function hashFor(view: View, achievements: AchievementDTO[]): string {
+  if (view.name === "about") return "#about";
+  if (view.name === "detail") {
+    const a = achievements.find((x) => x.id === view.id);
+    return a ? `#match-${String(a.matchNumber).padStart(3, "0")}` : "#record";
+  }
+  return "#record";
+}
+
+function viewFromHash(achievements: AchievementDTO[]): View {
+  const h = window.location.hash;
+  if (h === "#about") return { name: "about" };
+  const m = h.match(/^#match-(\d+)$/);
+  if (m) {
+    const num = parseInt(m[1], 10);
+    const a = achievements.find((x) => x.matchNumber === num);
+    if (a) return { name: "detail", id: a.id };
+  }
+  return { name: "list" };
+}
+
+// The public archive as one page with three views (record list / match
+// detail / about), mirroring the V1 site's behaviour — including hash
+// deep-links (#match-002, #about) and working Back/Forward.
+export default function PublicSite({
+  achievements,
+}: {
+  achievements: AchievementDTO[];
+}) {
+  const [view, setView] = useState<View>({ name: "list" });
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Initial view from the URL hash (deep links).
+  useEffect(() => {
+    setView(viewFromHash(achievements));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Back/Forward support.
+  useEffect(() => {
+    const onPop = () => setView(viewFromHash(achievements));
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("hashchange", onPop);
+    };
+  }, [achievements]);
+
+  const navigate = useCallback(
+    (next: View) => {
+      setView(next);
+      const h = hashFor(next, achievements);
+      if (window.location.hash !== h) {
+        history.pushState(null, "", h);
+      }
+      mainRef.current?.scrollIntoView({ block: "start" });
+    },
+    [achievements],
+  );
+
+  const openMatch = useCallback(
+    (id: number) => navigate({ name: "detail", id }),
+    [navigate],
+  );
+  const goList = useCallback(() => navigate({ name: "list" }), [navigate]);
+  const goAbout = useCallback(() => navigate({ name: "about" }), [navigate]);
+
+  const focusSearch = useCallback(() => {
+    navigate({ name: "list" });
+    // Wait for the list view to mount before focusing.
+    window.setTimeout(() => searchRef.current?.focus(), 60);
+  }, [navigate]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return achievements;
+    return achievements.filter((a) => a.opponent.toLowerCase().includes(q));
+  }, [achievements, query]);
+
+  const selected =
+    view.name === "detail"
+      ? achievements.find((a) => a.id === view.id) ?? null
+      : null;
+
+  const latest = achievements[0];
+
+  return (
+    <div className="relative min-h-dvh">
+      {/* Animated background */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
+        <div className="bg-glow bg-glow-a" />
+        <div className="bg-glow bg-glow-b" />
+      </div>
+      <EmberCanvas />
+
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-line bg-bg/88 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-stretch gap-2 px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={goList}
+            className="flex items-center gap-3 py-3 text-left"
+            aria-label="SYNDICATE Achievements — home"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-brand font-condensed text-2xl font-bold text-white">
+              S
+            </span>
+            <span className="leading-none">
+              <span className="block font-condensed text-[22px] font-bold uppercase tracking-wide">
+                SYNDICATE
+              </span>
+              <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.34em] text-ink/55">
+                Achievements
+              </span>
+            </span>
+          </button>
+          <nav
+            className="ml-auto flex items-stretch"
+            aria-label="Site"
+          >
+            <NavButton active={view.name !== "about"} onClick={goList}>
+              The Record
+            </NavButton>
+            <NavButton onClick={focusSearch}>Search</NavButton>
+            <NavButton active={view.name === "about"} onClick={goAbout}>
+              About Us
+            </NavButton>
+          </nav>
+        </div>
+      </header>
+
+      <main ref={mainRef} className="relative z-10 scroll-mt-20">
+        {view.name === "list" && (
+          <>
+            {/* Hero */}
+            <section className="relative overflow-hidden border-b border-line">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/seed/hero-arena.webp"
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#050506]/60 via-[#050506]/25 to-[#050506]/90" />
+              <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:px-6 sm:pt-24">
+                <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.24em] text-[#ffb3b0]">
+                  <span className="h-0.5 w-8 bg-brand" aria-hidden />
+                  The official match archive
+                </p>
+                <h1 className="mt-4 font-condensed text-[clamp(3.4rem,11vw,7rem)] font-bold uppercase leading-[0.92]">
+                  SYNDICATE
+                  <span className="block text-brand">Achievements</span>
+                </h1>
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/75">
+                  Every guild-vs-guild series the squad has filed — final
+                  scores, every game, every result screen. Nothing here is a
+                  claim; it is all on record.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document
+                        .getElementById("record")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="inline-flex min-h-12 items-center justify-center bg-brand px-7 font-condensed text-lg font-bold uppercase tracking-wider text-white transition hover:bg-branddeep"
+                  >
+                    Browse the record
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goAbout}
+                    className="inline-flex min-h-12 items-center justify-center border border-linestrong bg-black/30 px-7 font-condensed text-lg font-bold uppercase tracking-wider text-ink backdrop-blur-sm transition hover:border-brand hover:text-brand"
+                  >
+                    About the guild
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* The Record */}
+            <section
+              id="record"
+              className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-20 pt-10 sm:px-6"
+            >
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-sm text-brand">01</span>
+                <h2 className="font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
+                  The Record
+                </h2>
+              </div>
+
+              <div className="mt-7">
+                <SearchBar
+                  achievements={achievements}
+                  query={query}
+                  onQueryChange={setQuery}
+                  onOpen={openMatch}
+                  inputRef={searchRef}
+                />
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {achievements.length === 0 ? (
+                  <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
+                    <p className="font-condensed text-3xl font-bold uppercase">
+                      No achievements on record yet
+                    </p>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
+                      The archive is empty for now. When the guild files its
+                      first win, it will be recorded here — score, screenshots
+                      and all.
+                    </p>
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
+                    <p className="font-condensed text-3xl font-bold uppercase">
+                      No guild found
+                    </p>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
+                      Nothing in the record matches &ldquo;{query.trim()}&rdquo;.
+                      Check the name, or clear the search to see every filed
+                      series.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setQuery("")}
+                      className="mt-6 inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                ) : (
+                  filtered.map((a) => (
+                    <RecordCard key={a.id} achievement={a} onOpen={openMatch} />
+                  ))
+                )}
+              </div>
+            </section>
+          </>
+        )}
+
+        {view.name === "detail" && (
+          <div className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6">
+            {selected ? (
+              <MatchDetail achievement={selected} onBack={goList} />
+            ) : (
+              <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
+                <p className="font-condensed text-3xl font-bold uppercase">
+                  That match is no longer on record
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">
+                  It may have been removed from the archive. The full record is
+                  still there — head back and pick another series.
+                </p>
+                <button
+                  type="button"
+                  onClick={goList}
+                  className="mt-6 inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
+                >
+                  Back to the record
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {view.name === "about" && (
+          <div className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6">
+            <AboutView onBack={goList} />
+          </div>
+        )}
+      </main>
+
+      {/* Footer — guild links only, never personal links. */}
+      <footer className="relative z-10 border-t border-line bg-[#08080a]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center">
+          <div>
+            <p className="font-condensed text-2xl font-bold uppercase leading-none">
+              SYNDICATE <span className="text-brand">Achievements</span>
+            </p>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/50">
+              The squad&rsquo;s official match archive.
+              {latest
+                ? ` ${matchLabel(latest.matchNumber)} on file — ${achievements.length} ${
+                    achievements.length === 1 ? "series" : "series"
+                  } in the record.`
+                : " The first filed win is pending."}
+            </p>
+          </div>
+          <nav
+            className="flex flex-wrap gap-x-7 gap-y-3 md:ml-auto"
+            aria-label="Guild links"
+          >
+            <a
+              href={GUILD.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+            >
+              {GUILD.instagramHandle}
+            </a>
+            <a
+              href={GUILD.discordUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+            >
+              Discord
+            </a>
+            <button
+              type="button"
+              onClick={goAbout}
+              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+            >
+              About Us
+            </button>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+            >
+              Back to top
+            </button>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function NavButton({
+  children,
+  onClick,
+  active = false,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  active?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex min-h-11 items-center border-b-2 px-3 font-condensed text-[15px] font-semibold uppercase tracking-wider transition sm:px-4 sm:text-base ${
+        active
+          ? "border-brand text-ink"
+          : "border-transparent text-ink/60 hover:text-ink"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
