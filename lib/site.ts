@@ -25,15 +25,15 @@ export const OWNERS: Owner[] = [
   },
   {
     name: "Supreme SYN",
-    note: "Co-owner of the guild, running SYNDICATE alongside the other owners.",
+    note: "Owner of SYNDICATE and of the guild's official Discord community.",
   },
   {
     name: "Rakim SYN",
-    note: "Co-owner of the guild, running SYNDICATE alongside the other owners.",
+    note: "Owner of SYNDICATE and of the guild's official Discord community.",
   },
   {
     name: "Vaughan SYN",
-    note: "Co-owner of the guild, running SYNDICATE alongside the other owners.",
+    note: "Owner of SYNDICATE and of the guild's official Discord community.",
   },
 ];
 
