@@ -25,8 +25,10 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
         aria-label={`View match ${matchLabel(a.matchNumber)} against ${a.opponent}`}
       >
         <div className="flex flex-col sm:flex-row">
-          {/* Thumbnail */}
-          <div className="relative shrink-0 overflow-hidden sm:w-72 lg:w-80">
+          {/* Thumbnail — fixed box matching the original static design:
+              300×188px on desktop, full-width 16:9 when stacked on mobile.
+              The frame owns the size; it never stretches with the body. */}
+          <div className="relative aspect-video w-full shrink-0 self-start overflow-hidden sm:aspect-auto sm:h-[188px] sm:w-[300px]">
             {thumb ? (
               // Plain <img>: screenshot URLs are admin-managed (Blob or any
               // pasted URL), so next/image host restrictions don't apply here.
@@ -38,11 +40,11 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
                     ? `SYNDICATE vs ${a.opponent} — match poster`
                     : `${a.opponent} — deciding game screenshot`
                 }
-                className="img-in aspect-video h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                className="img-in h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
               />
             ) : (
-              <div className="flex aspect-video h-full w-full items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">
+              <div className="flex h-full w-full items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">
                 No screenshot
               </div>
             )}
