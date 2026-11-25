@@ -16,16 +16,20 @@ export const GUILD = {
 export interface Owner {
   name: string;
   note: string;
+  /** Founders also carry the golden "Syn Founder" badge on the About view. */
+  founder?: boolean;
 }
 
 export const OWNERS: Owner[] = [
   {
     name: "Krrish SYN",
     note: "Owner of SYNDICATE and of the guild's official Discord community.",
+    founder: true,
   },
   {
     name: "Supreme SYN",
     note: "Owner of SYNDICATE and of the guild's official Discord community.",
+    founder: true,
   },
   {
     name: "Hack SYN",
