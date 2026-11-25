@@ -123,6 +123,28 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         </dl>
       </div>
 
+      {/* Opponent channel bar — only when a channel link is on file.
+          Sits directly under the scoreline/spec block, above the games. */}
+      {a.opponentChannelUrl && (
+        <div
+          className="anim-fade-rise mt-8 flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4"
+          style={{ "--anim-delay": "140ms" } as React.CSSProperties}
+        >
+          <span className="live-dot shrink-0" aria-hidden />
+          <p className="min-w-0 flex-1 font-condensed text-xl font-semibold uppercase">
+            {a.opponent} <span className="text-ink/40">— YouTube Channel</span>
+          </p>
+          <a
+            href={a.opponentChannelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep"
+          >
+            Visit channel →
+          </a>
+        </div>
+      )}
+
       {/* Per-game breakdown */}
       <div
         className="anim-fade-rise"
@@ -184,27 +206,6 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           </article>
         ))}
       </div>
-
-      {/* Opponent channel bar — only when a channel link is on file. */}
-      {a.opponentChannelUrl && (
-        <div
-          className="anim-fade-rise mt-8 flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4"
-          style={{ "--anim-delay": "140ms" } as React.CSSProperties}
-        >
-          <span className="live-dot shrink-0" aria-hidden />
-          <p className="min-w-0 flex-1 font-condensed text-xl font-semibold uppercase">
-            {a.opponent} <span className="text-ink/40">— YouTube Channel</span>
-          </p>
-          <a
-            href={a.opponentChannelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep"
-          >
-            Visit channel →
-          </a>
-        </div>
-      )}
 
       <button
         type="button"
