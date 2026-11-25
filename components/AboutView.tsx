@@ -26,7 +26,7 @@ function TemplateText() {
   );
 }
 
-// About Us: guild facts, the four owners, the three official casters with
+// About Us: guild facts, the five owners, the three official casters with
 // their channels, the official Discord/Instagram, and the copy-paste
 // template for announcing new achievements. All guild links — never any
 // personal links.
@@ -100,7 +100,7 @@ export default function AboutView({ onBack }: Props) {
           Guild Owners
         </h3>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
-          SYNDICATE is run by four owners. They lead the guild, pick the squad
+          SYNDICATE is run by five owners. They lead the guild, pick the squad
           for guild-vs-guild series, and file every win into this archive.
         </p>
         <div className="mt-6 flex flex-nowrap gap-1.5 sm:gap-4">
