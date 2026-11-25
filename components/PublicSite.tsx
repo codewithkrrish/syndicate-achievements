@@ -120,16 +120,20 @@ export default function PublicSite({
           <button
             type="button"
             onClick={goList}
-            className="flex items-center py-3 text-left"
+            className="flex items-center gap-3 py-3 text-left"
             aria-label="SYNDICATE Achievements — home"
           >
-            {/* Plain <img>: static public asset, next/image adds nothing here. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/guild-logo-wide.png"
-              alt="SYNDICATE"
-              className="h-10 w-auto sm:h-11"
-            />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-brand font-condensed text-2xl font-bold text-white">
+              S
+            </span>
+            <span className="leading-none">
+              <span className="block font-condensed text-[22px] font-bold uppercase tracking-wide">
+                SYNDICATE
+              </span>
+              <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.34em] text-ink/55">
+                Achievements
+              </span>
+            </span>
           </button>
           <nav
             className="ml-auto flex items-stretch"
