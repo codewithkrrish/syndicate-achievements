@@ -103,19 +103,19 @@ export default function AboutView({ onBack }: Props) {
           SYNDICATE is run by four owners. They lead the guild, pick the squad
           for guild-vs-guild series, and file every win into this archive.
         </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 flex flex-nowrap gap-1.5 sm:gap-4">
         {OWNERS.map((o) => (
-          <article key={o.name} className="border border-line bg-raise p-5">
-            <span className="flex h-11 w-11 items-center justify-center bg-brand font-condensed text-xl font-bold text-white">
+          <article key={o.name} className="min-w-0 flex-1 border border-line bg-raise p-2 sm:p-5">
+            <span className="flex h-7 w-7 items-center justify-center bg-brand font-condensed text-sm font-bold text-white sm:h-11 sm:w-11 sm:text-xl">
               {o.name.charAt(0)}
             </span>
-            <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
+            <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.12em] text-brand sm:mt-4 sm:text-[10px] sm:tracking-[0.2em]">
               Guild Owner
             </p>
-            <h4 className="mt-1 font-condensed text-2xl font-bold uppercase leading-tight">
+            <h4 className="mt-1 break-words font-condensed text-[13px] font-bold uppercase leading-tight sm:text-2xl">
               {o.name}
             </h4>
-            <p className="mt-2 text-sm leading-relaxed text-ink/60">{o.note}</p>
+            <p className="mt-1 text-[10px] leading-snug text-ink/60 sm:mt-2 sm:text-sm sm:leading-relaxed">{o.note}</p>
           </article>
         ))}
         </div>
