@@ -8,10 +8,9 @@ interface Props {
   onOpen: (id: number) => void;
 }
 
-// One entry in The Record. Thumbnail (poster when set, else the decider
-// screenshot) in a fixed 16:9 frame with the result badge and score
-// overlay, then title, the short card line, the meta grid, and the View
-// match action. The whole card is a button — one tap target, no nested
+// One entry in The Record. Thumbnail (decider screenshot) with result badge
+// and score overlay, then title, the short card line, the meta grid, and the
+// View match action. The whole card is a button — one tap target, no nested
 // interactive elements.
 export default function RecordCard({ achievement: a, onOpen }: Props) {
   const thumb = thumbnailOf(a);
@@ -26,11 +25,8 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
         aria-label={`View match ${matchLabel(a.matchNumber)} against ${a.opponent}`}
       >
         <div className="flex flex-col sm:flex-row">
-          {/* Thumbnail — a fixed 16:9 frame at every breakpoint. The frame
-              owns the aspect (never the image, never the body height), so a
-              poster, a screenshot, or any future upload renders in the exact
-              same box and the card's shape never depends on the image. */}
-          <div className="relative aspect-video w-full shrink-0 self-start overflow-hidden sm:w-72 lg:w-80">
+          {/* Thumbnail */}
+          <div className="relative shrink-0 overflow-hidden sm:w-72 lg:w-80">
             {thumb ? (
               // Plain <img>: screenshot URLs are admin-managed (Blob or any
               // pasted URL), so next/image host restrictions don't apply here.
@@ -42,11 +38,11 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
                     ? `SYNDICATE vs ${a.opponent} — match poster`
                     : `${a.opponent} — deciding game screenshot`
                 }
-                className="img-in absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                className="img-in aspect-video h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">
+              <div className="flex aspect-video h-full w-full items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">
                 No screenshot
               </div>
             )}
