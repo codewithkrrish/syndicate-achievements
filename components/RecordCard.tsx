@@ -8,10 +8,12 @@ interface Props {
   onOpen: (id: number) => void;
 }
 
-// One entry in The Record. Thumbnail (decider screenshot) with result badge
-// and score overlay, then title, the short card line, the meta grid, and the
-// View match action. The whole card is a button — one tap target, no nested
-// interactive elements.
+// One entry in The Record, laid out exactly like the original static
+// design: thumbnail (decider screenshot) with result badge and score
+// overlay, then the main column (kicker, title, card line, meta grid),
+// then a right side column with the final-score block on top and the
+// View match action at the bottom. The whole card is a button — one tap
+// target, no nested interactive elements.
 export default function RecordCard({ achievement: a, onOpen }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
@@ -60,36 +62,42 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
             </span>
           </div>
 
-          {/* Body */}
-          <div className="min-w-0 flex-1 p-5 sm:p-6">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand">
-              Match {matchLabel(a.matchNumber)}
+          {/* Main column */}
+          <div className="min-w-0 flex-1 px-4 pb-[0.4rem] pt-4 sm:px-[1.15rem] sm:pb-[1.1rem] sm:pt-[1.05rem]">
+            <p className="text-[0.74rem] font-bold uppercase tracking-[0.2em] text-brand">
+              Match {matchLabel(a.matchNumber)} · Achievement
             </p>
             <h3 className="mt-1.5 font-condensed text-3xl font-bold uppercase leading-none sm:text-4xl">
               SYNDICATE <span className="text-ink/40">vs</span> {a.opponent}
             </h3>
-            <p className="mt-2.5 text-[15px] leading-relaxed text-ink/65">
+            <p className="mt-2 max-w-[36rem] text-[0.95rem] leading-normal text-ink/65">
               {a.cardLine}
             </p>
 
-            <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-4 sm:grid-cols-3 lg:grid-cols-5">
+            <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-[0.85rem] sm:grid-cols-3 lg:grid-cols-5">
               <Meta label="Guild / Creator" value={a.opponent} />
               <Meta label="Date" value={formatDate(a.date)} />
               <Meta label="Mode" value={a.mode} />
               <Meta label="Map" value={a.map} />
               <Meta label="Format" value={a.format} />
             </dl>
+          </div>
 
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <span className="font-condensed text-2xl font-bold leading-none">
-                <span className={isWin ? "text-brand" : "text-ink/60"}>
-                  {a.finalScore}
-                </span>
+          {/* Side column — final score top-right, View match bottom-right.
+              On mobile it becomes a bottom row under a divider, like the
+              static design. */}
+          <div className="mt-[0.35rem] flex shrink-0 items-center justify-between gap-4 border-t border-line px-4 py-3 sm:mt-0 sm:flex-col sm:items-end sm:justify-between sm:border-t-0 sm:pb-[1.1rem] sm:pl-0 sm:pr-[1.15rem] sm:pt-[1.05rem] sm:text-right">
+            <div className="flex items-baseline gap-2 sm:block">
+              <span className="whitespace-nowrap font-condensed text-[2rem] font-bold leading-none text-brand">
+                {a.finalScore}
               </span>
-              <span className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition group-hover:text-brand">
-                View match →
+              <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-ink/40 sm:mt-[0.3rem] sm:block">
+                Final score
               </span>
             </div>
+            <span className="whitespace-nowrap text-[0.84rem] font-bold uppercase tracking-[0.1em] text-brand">
+              View match →
+            </span>
           </div>
         </div>
       </button>
