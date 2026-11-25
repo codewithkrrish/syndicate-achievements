@@ -7,6 +7,7 @@ import { matchLabel } from "@/lib/format";
 import EmberCanvas from "./EmberCanvas";
 import SearchBar from "./SearchBar";
 import RecordCard from "./RecordCard";
+import Reveal from "./Reveal";
 import MatchDetail from "./MatchDetail";
 import AboutView from "./AboutView";
 
@@ -114,7 +115,7 @@ export default function PublicSite({
       <EmberCanvas />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-line bg-bg/88 backdrop-blur-md">
+      <header className="anim-fade-in sticky top-0 z-50 border-b border-line bg-bg/88 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-stretch gap-2 px-4 sm:px-6">
           <button
             type="button"
@@ -158,24 +159,33 @@ export default function PublicSite({
               <img
                 src="/seed/hero-arena.webp"
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
+                className="img-in absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-[#050506]/60 via-[#050506]/25 to-[#050506]/90" />
               <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:px-6 sm:pt-24">
-                <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.24em] text-[#ffb3b0]">
+                <p className="anim-fade-rise flex items-center gap-3 text-xs font-bold uppercase tracking-[0.24em] text-[#ffb3b0]">
                   <span className="h-0.5 w-8 bg-brand" aria-hidden />
                   The official match archive
                 </p>
-                <h1 className="mt-4 font-condensed text-[clamp(3.4rem,11vw,7rem)] font-bold uppercase leading-[0.92]">
+                <h1
+                  className="anim-fade-rise mt-4 font-condensed text-[clamp(3.4rem,11vw,7rem)] font-bold uppercase leading-[0.92]"
+                  style={{ "--anim-delay": "70ms" } as React.CSSProperties}
+                >
                   SYNDICATE
                   <span className="block text-brand">Achievements</span>
                 </h1>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/75">
+                <p
+                  className="anim-fade-rise mt-5 max-w-xl text-base leading-relaxed text-ink/75"
+                  style={{ "--anim-delay": "140ms" } as React.CSSProperties}
+                >
                   Every guild-vs-guild series the squad has filed — final
                   scores, every game, every result screen. Nothing here is a
                   claim; it is all on record.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div
+                  className="anim-fade-rise mt-8 flex flex-col gap-3 sm:flex-row"
+                  style={{ "--anim-delay": "210ms" } as React.CSSProperties}
+                >
                   <button
                     type="button"
                     onClick={() =>
@@ -203,14 +213,16 @@ export default function PublicSite({
               id="record"
               className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-20 pt-10 sm:px-6"
             >
-              <div className="flex items-baseline gap-4">
-                <span className="font-mono text-sm text-brand">01</span>
-                <h2 className="font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
-                  The Record
-                </h2>
-              </div>
+              <Reveal>
+                <div className="flex items-baseline gap-4">
+                  <span className="font-mono text-sm text-brand">01</span>
+                  <h2 className="font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
+                    The Record
+                  </h2>
+                </div>
+              </Reveal>
 
-              <div className="mt-7">
+              <Reveal className="mt-7" delay={60}>
                 <SearchBar
                   achievements={achievements}
                   query={query}
@@ -218,41 +230,47 @@ export default function PublicSite({
                   onOpen={openMatch}
                   inputRef={searchRef}
                 />
-              </div>
+              </Reveal>
 
               <div className="mt-4 space-y-4">
                 {achievements.length === 0 ? (
-                  <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
-                    <p className="font-condensed text-3xl font-bold uppercase">
-                      No achievements on record yet
-                    </p>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
-                      The archive is empty for now. When the guild files its
-                      first win, it will be recorded here — score, screenshots
-                      and all.
-                    </p>
-                  </div>
+                  <Reveal>
+                    <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
+                      <p className="font-condensed text-3xl font-bold uppercase">
+                        No achievements on record yet
+                      </p>
+                      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
+                        The archive is empty for now. When the guild files its
+                        first win, it will be recorded here — score, screenshots
+                        and all.
+                      </p>
+                    </div>
+                  </Reveal>
                 ) : filtered.length === 0 ? (
-                  <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
-                    <p className="font-condensed text-3xl font-bold uppercase">
-                      No guild found
-                    </p>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
-                      Nothing in the record matches &ldquo;{query.trim()}&rdquo;.
-                      Check the name, or clear the search to see every filed
-                      series.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setQuery("")}
-                      className="mt-6 inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
-                    >
-                      Clear search
-                    </button>
-                  </div>
+                  <Reveal>
+                    <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
+                      <p className="font-condensed text-3xl font-bold uppercase">
+                        No guild found
+                      </p>
+                      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink/55">
+                        Nothing in the record matches &ldquo;{query.trim()}&rdquo;.
+                        Check the name, or clear the search to see every filed
+                        series.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setQuery("")}
+                        className="mt-6 inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
+                      >
+                        Clear search
+                      </button>
+                    </div>
+                  </Reveal>
                 ) : (
-                  filtered.map((a) => (
-                    <RecordCard key={a.id} achievement={a} onOpen={openMatch} />
+                  filtered.map((a, i) => (
+                    <Reveal key={a.id} delay={Math.min(i * 75, 300)}>
+                      <RecordCard achievement={a} onOpen={openMatch} />
+                    </Reveal>
                   ))
                 )}
               </div>
@@ -316,7 +334,7 @@ export default function PublicSite({
               href={GUILD.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+              className="link-line font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
             >
               {GUILD.instagramHandle}
             </a>
@@ -324,21 +342,21 @@ export default function PublicSite({
               href={GUILD.discordUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+              className="link-line font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
             >
               Discord
             </a>
             <button
               type="button"
               onClick={goAbout}
-              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+              className="link-line font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
             >
               About Us
             </button>
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
+              className="link-line font-condensed text-base font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand"
             >
               Back to top
             </button>

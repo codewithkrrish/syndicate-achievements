@@ -151,3 +151,163 @@ mark.hl {
 .thin-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ------------------------------------------------------------------ */
+/* Motion system (public site)                                         */
+/* One language everywhere: a short fade-rise on a soft ease-out       */
+/* cubic, ~14px of travel, staggered by --anim-delay / Reveal delay.   */
+/* Keyframes animate transform + opacity ONLY — nothing here can cause */
+/* layout thrash or scroll jank.                                       */
+/*                                                                     */
+/* Two halves:                                                         */
+/*  - .anim-* classes: pure CSS entrance animations. They play on      */
+/*    mount with no JavaScript involved, and the element's static      */
+/*    state is fully visible — if CSS or JS fails, content shows.      */
+/*  - .reveal / .reveal-hidden: driven by components/Reveal.tsx,       */
+/*    which applies the hidden state only after mount (client-side)    */
+/*    and reveals on load (in-view elements) or on scroll into view.   */
+/* ------------------------------------------------------------------ */
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lightbox-img-in {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lightbox-img-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+/* Page-open entrance (hero, header, detail blocks). Stagger by setting
+   style={{ "--anim-delay": "80ms" }} on successive elements. */
+.anim-fade-rise {
+  animation: fade-rise 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--anim-delay, 0ms);
+}
+
+.anim-fade-in {
+  animation: fade-in 0.5s ease-out both;
+  animation-delay: var(--anim-delay, 0ms);
+}
+
+/* Images fade in as they appear (mount), so a screenshot never pops. */
+.img-in {
+  animation: fade-in 0.55s ease-out both;
+}
+
+/* Live search dropdown. */
+.dropdown-in {
+  animation: drop-in 0.18s ease-out both;
+}
+
+/* Screenshot lightbox: backdrop fades, image fades with a slight scale.
+   The -out pair plays on close (MatchDetail holds the element for the
+   duration of the exit before unmounting). */
+.lightbox-in {
+  animation: fade-in 0.22s ease-out both;
+}
+.lightbox-img-in {
+  animation: lightbox-img-in 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.lightbox-out {
+  animation: fade-in 0.18s ease-in both reverse;
+}
+.lightbox-img-out {
+  animation: lightbox-img-out 0.18s ease-in both;
+}
+
+/* Scroll / load reveal (components/Reveal.tsx). */
+.reveal {
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+/* Animated underline for plain text links (footer, caster channels). */
+.link-line {
+  position: relative;
+}
+.link-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.link-line:hover::after,
+.link-line:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Reduced motion: EVERYTHING above (and the background/live-dot motion
+   defined earlier) goes still — animations off, transitions near-instant,
+   smooth scroll off, and Reveal content simply shown. The Reveal
+   component also checks the media query itself and never hides content. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal-hidden {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

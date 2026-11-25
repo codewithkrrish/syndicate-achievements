@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ACHIEVEMENT_TEMPLATE, CASTERS, GUILD, OWNERS } from "@/lib/site";
+import Reveal from "./Reveal";
 
 interface Props {
   onBack: () => void;
@@ -60,24 +61,33 @@ export default function AboutView({ onBack }: Props) {
       <button
         type="button"
         onClick={onBack}
-        className="font-condensed text-base font-semibold uppercase tracking-wider text-ink/60 transition hover:text-brand"
+        className="anim-fade-rise font-condensed text-base font-semibold uppercase tracking-wider text-ink/60 transition hover:text-brand"
       >
         ← Back to the record
       </button>
 
-      <div className="mt-6 flex items-baseline gap-4">
+      <div
+        className="anim-fade-rise mt-6 flex items-baseline gap-4"
+        style={{ "--anim-delay": "60ms" } as React.CSSProperties}
+      >
         <span className="font-mono text-sm text-brand">03</span>
         <h2 className="font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
           About Us
         </h2>
       </div>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink/65">
+      <p
+        className="anim-fade-rise mt-4 max-w-2xl text-base leading-relaxed text-ink/65"
+        style={{ "--anim-delay": "120ms" } as React.CSSProperties}
+      >
         The guild behind the record — who runs SYNDICATE, who casts its
         matches, and where the community lives.
       </p>
 
       {/* Guild facts */}
-      <dl className="mt-8 grid grid-cols-2 border border-line bg-raise lg:grid-cols-4">
+      <dl
+        className="anim-fade-rise mt-8 grid grid-cols-2 border border-line bg-raise lg:grid-cols-4"
+        style={{ "--anim-delay": "170ms" } as React.CSSProperties}
+      >
         <Fact label="Guild" value={`${GUILD.name} (${GUILD.tag})`} />
         <Fact label="Game" value={GUILD.game} />
         <Fact label="Focus" value={GUILD.focus} />
@@ -85,14 +95,15 @@ export default function AboutView({ onBack }: Props) {
       </dl>
 
       {/* Owners */}
-      <h3 className="mt-12 font-condensed text-3xl font-bold uppercase">
-        Guild Owners
-      </h3>
-      <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
-        SYNDICATE is run by four owners. They lead the guild, pick the squad
-        for guild-vs-guild series, and file every win into this archive.
-      </p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Reveal className="mt-12">
+        <h3 className="font-condensed text-3xl font-bold uppercase">
+          Guild Owners
+        </h3>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
+          SYNDICATE is run by four owners. They lead the guild, pick the squad
+          for guild-vs-guild series, and file every win into this archive.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {OWNERS.map((o) => (
           <article key={o.name} className="border border-line bg-raise p-5">
             <span className="flex h-11 w-11 items-center justify-center bg-brand font-condensed text-xl font-bold text-white">
@@ -107,50 +118,54 @@ export default function AboutView({ onBack }: Props) {
             <p className="mt-2 text-sm leading-relaxed text-ink/60">{o.note}</p>
           </article>
         ))}
-      </div>
+        </div>
+      </Reveal>
 
       {/* Casters */}
-      <h3 className="mt-12 font-condensed text-3xl font-bold uppercase">
-        Official Casters
-      </h3>
-      <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
-        Three content creators cast SYNDICATE&rsquo;s matches on behalf of the
-        guild — live commentary, match coverage and the guild&rsquo;s series
-        as they happen.
-      </p>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {CASTERS.map((c) => (
-          <article key={c.name} className="flex flex-col border border-line bg-raise p-5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
-              Official Caster · Content Creator
-            </p>
-            <h4 className="mt-1.5 font-condensed text-2xl font-bold uppercase leading-tight">
-              {c.name}
-            </h4>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/60">{c.note}</p>
-            <a
-              href={c.channelUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 font-condensed text-base font-semibold uppercase tracking-wider text-ink/75 transition hover:text-brand"
-            >
-              {c.handle} on YouTube →
-            </a>
-          </article>
-        ))}
-      </div>
+      <Reveal className="mt-12">
+        <h3 className="font-condensed text-3xl font-bold uppercase">
+          Official Casters
+        </h3>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
+          Three content creators cast SYNDICATE&rsquo;s matches on behalf of the
+          guild — live commentary, match coverage and the guild&rsquo;s series
+          as they happen.
+        </p>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {CASTERS.map((c) => (
+            <article key={c.name} className="flex flex-col border border-line bg-raise p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
+                Official Caster · Content Creator
+              </p>
+              <h4 className="mt-1.5 font-condensed text-2xl font-bold uppercase leading-tight">
+                {c.name}
+              </h4>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-ink/60">{c.note}</p>
+              <a
+                href={c.channelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-line mt-4 self-start font-condensed text-base font-semibold uppercase tracking-wider text-ink/75 transition hover:text-brand"
+              >
+                {c.handle} on YouTube →
+              </a>
+            </article>
+          ))}
+        </div>
+      </Reveal>
 
       {/* Join */}
-      <h3 className="mt-12 font-condensed text-3xl font-bold uppercase">
-        Join the Guild
-      </h3>
-      <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
-        Guild matches are organised in the guild&rsquo;s official Discord —
-        announcements, match scheduling and every new achievement land there
-        first. Follow the guild on Instagram for posters, highlights and
-        updates between series.
-      </p>
-      <div className="mt-6 space-y-3">
+      <Reveal className="mt-12">
+        <h3 className="font-condensed text-3xl font-bold uppercase">
+          Join the Guild
+        </h3>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
+          Guild matches are organised in the guild&rsquo;s official Discord —
+          announcements, match scheduling and every new achievement land there
+          first. Follow the guild on Instagram for posters, highlights and
+          updates between series.
+        </p>
+        <div className="mt-6 space-y-3">
         <div className="flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4">
           <p className="min-w-0 flex-1">
             <span className="block font-condensed text-xl font-semibold uppercase">
@@ -187,36 +202,39 @@ export default function AboutView({ onBack }: Props) {
             Follow on Instagram →
           </a>
         </div>
-      </div>
+        </div>
+      </Reveal>
 
       {/* New achievement template */}
-      <h3 className="mt-12 font-condensed text-3xl font-bold uppercase">
-        New Achievement Template
-      </h3>
-      <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
-        The standard post for every new win. Copy it, paste it wherever the
-        win gets announced, and replace each{" "}
-        <span className="ph">[BRACKETED]</span> placeholder with the new
-        match&rsquo;s details — the guild&rsquo;s Discord and Instagram links
-        are already filled in.
-      </p>
-      <div className="mt-6 border border-line bg-raise">
-        <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/55">
-            Match announcement · Copy &amp; fill
-          </p>
-          <button
-            type="button"
-            onClick={copyTemplate}
-            className={`ml-auto inline-flex min-h-10 items-center px-4 font-condensed text-sm font-bold uppercase tracking-wider text-white transition ${
-              copied ? "bg-emerald-700" : "bg-brand hover:bg-branddeep"
-            }`}
-          >
-            {copied ? "Copied — ready to paste" : "Copy template"}
-          </button>
+      <Reveal className="mt-12">
+        <h3 className="font-condensed text-3xl font-bold uppercase">
+          New Achievement Template
+        </h3>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink/60">
+          The standard post for every new win. Copy it, paste it wherever the
+          win gets announced, and replace each{" "}
+          <span className="ph">[BRACKETED]</span> placeholder with the new
+          match&rsquo;s details — the guild&rsquo;s Discord and Instagram links
+          are already filled in.
+        </p>
+        <div className="mt-6 border border-line bg-raise">
+          <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/55">
+              Match announcement · Copy &amp; fill
+            </p>
+            <button
+              type="button"
+              onClick={copyTemplate}
+              className={`ml-auto inline-flex min-h-10 items-center px-4 font-condensed text-sm font-bold uppercase tracking-wider text-white transition ${
+                copied ? "bg-emerald-700" : "bg-brand hover:bg-branddeep"
+              }`}
+            >
+              {copied ? "Copied — ready to paste" : "Copy template"}
+            </button>
+          </div>
+          <TemplateText />
         </div>
-        <TemplateText />
-      </div>
+      </Reveal>
     </section>
   );
 }

@@ -142,7 +142,7 @@ export default function SearchBar({
         <div
           id="live-results"
           role="listbox"
-          className="thin-scroll absolute inset-x-0 top-full z-40 mt-1 max-h-[min(26rem,calc(100dvh-11rem))] overflow-y-auto border border-linestrong bg-card shadow-panel"
+          className="dropdown-in thin-scroll absolute inset-x-0 top-full z-40 mt-1 max-h-[min(26rem,calc(100dvh-11rem))] overflow-y-auto border border-linestrong bg-card shadow-panel"
         >
           <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
             <span className="live-dot" aria-hidden />

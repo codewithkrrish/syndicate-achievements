@@ -17,7 +17,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
   const isWin = a.result === "WIN";
 
   return (
-    <article className="group border border-line bg-raise transition hover:border-linestrong">
+    <article className="group border border-line bg-raise transition duration-300 hover:-translate-y-[3px] hover:border-linestrong hover:shadow-[0_14px_34px_rgba(0,0,0,0.45)] active:translate-y-0">
       <button
         type="button"
         onClick={() => onOpen(a.id)}
@@ -38,7 +38,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
                     ? `SYNDICATE vs ${a.opponent} — match poster`
                     : `${a.opponent} — deciding game screenshot`
                 }
-                className="aspect-video h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                className="img-in aspect-video h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
               />
             ) : (
