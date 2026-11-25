@@ -10,17 +10,16 @@ interface Props {
 
 // One entry in The Record, laid out exactly like the original static
 // design: thumbnail (decider screenshot) with result badge and score
-// overlay, then the main column (kicker, title, card line, opponent
-// channel link when set, meta grid), then a right side column with
-// the final-score block on top and the View match action at the
-// bottom. On phones the card stays a horizontal list row — compact
-// thumbnail rail on the left, with the final-score block and View
-// match folded into the main column — never a stacked card.
+// overlay, then the main column (kicker, title, card line, meta grid),
+// then a right side column with the final-score block on top and the
+// View match action at the bottom. On phones the card stays a
+// horizontal list row — compact thumbnail rail on the left, with the
+// final-score block and View match folded into the main column —
+// never a stacked card.
 // Click-to-open is a card-sized button UNDERLAY: the visible content
 // sits above it with pointer-events off, so the whole card still
-// opens the match, while the opponent channel link in the body is a
-// real link (pointer-events back on) that opens YouTube in a new tab
-// and never triggers the card's open.
+// opens the match. The opponent's channel link lives in the match
+// detail view, never on the card face.
 export default function RecordCard({ achievement: a, onOpen }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
@@ -99,34 +98,6 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
             <p className="mt-2 max-w-[36rem] text-[0.85rem] leading-normal text-ink/65 sm:text-[0.95rem]">
               {a.cardLine}
             </p>
-
-            {/* Opponent channel — only when the record carries an
-                opponentChannelUrl; renders nothing at all otherwise.
-                A real link above the card's button underlay
-                (pointer-events back on for this row only): it opens
-                the opponent's YouTube channel in a new tab and never
-                opens the match detail. */}
-            {a.opponentChannelUrl ? (
-              <div className="pointer-events-auto mt-2.5 sm:mt-3">
-                <a
-                  href={a.opponentChannelUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-line inline-flex items-center gap-1.5 text-[0.8rem] font-medium text-ink/70 transition hover:text-brand sm:text-[0.85rem]"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                    className="h-3.5 w-3.5 shrink-0 text-brand"
-                  >
-                    <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26.2 26.2 0 0 0 2 12a26.2 26.2 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26.2 26.2 0 0 0 22 12a26.2 26.2 0 0 0-.4-4.8ZM10 15.2V8.8L15.5 12Z" />
-                  </svg>
-                  {a.opponent}
-                  <span className="text-ink/40">on YouTube</span>
-                </a>
-              </div>
-            ) : null}
 
             <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 border-t border-line pt-3 sm:mt-4 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-4 sm:pt-[0.85rem] lg:grid-cols-5">
               <Meta label="Guild / Creator" value={a.opponent} />
