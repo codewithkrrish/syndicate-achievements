@@ -109,15 +109,15 @@ export default function AboutView({ onBack }: Props) {
             <span className="flex h-7 w-7 items-center justify-center bg-brand font-condensed text-sm font-bold text-white sm:h-11 sm:w-11 sm:text-xl">
               {o.name.charAt(0)}
             </span>
-            <div className="mt-2 flex flex-wrap items-center gap-1 sm:mt-4 sm:gap-1.5">
-              <span className="text-[8px] font-semibold uppercase tracking-[0.12em] text-brand sm:text-[10px] sm:tracking-[0.2em]">
-                Guild Owner
-              </span>
+            <div className="mt-2 flex flex-col items-start gap-1 sm:mt-4 sm:gap-1.5">
               {o.founder && (
                 <span className="border border-gold/45 bg-gold/10 px-1 py-px text-[8px] font-semibold uppercase tracking-[0.12em] text-gold sm:text-[10px] sm:tracking-[0.2em]">
                   Syn Founder
                 </span>
               )}
+              <span className="text-[8px] font-semibold uppercase tracking-[0.12em] text-brand sm:text-[10px] sm:tracking-[0.2em]">
+                Guild Owner
+              </span>
             </div>
             <h4 className="mt-1 break-words font-condensed text-[13px] font-bold uppercase leading-tight sm:text-2xl">
               {o.name}
