@@ -83,6 +83,15 @@ export default function AboutView({ onBack }: Props) {
         matches, and where the community lives.
       </p>
 
+      {/* Guild logo */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/guild-logo.png"
+        alt="SYNDICATE guild logo — chrome wordmark with a sword and red lightning"
+        className="anim-fade-rise mx-auto mt-8 w-full max-w-xs border border-line bg-black sm:max-w-sm"
+        style={{ "--anim-delay": "150ms" } as React.CSSProperties}
+      />
+
       {/* Guild facts */}
       <dl
         className="anim-fade-rise mt-8 grid grid-cols-2 border border-line bg-raise lg:grid-cols-4"
