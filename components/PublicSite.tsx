@@ -123,9 +123,12 @@ export default function PublicSite({
             className="flex items-center gap-3 py-3 text-left"
             aria-label="SYNDICATE Achievements — home"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-brand font-condensed text-2xl font-bold text-white">
-              S
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/guild-logo.png"
+              alt=""
+              className="h-10 w-10 shrink-0 object-cover"
+            />
             <span className="leading-none">
               <span className="block font-condensed text-[22px] font-bold uppercase tracking-wide">
                 SYNDICATE
