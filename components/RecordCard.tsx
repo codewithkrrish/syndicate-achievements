@@ -2,6 +2,7 @@
 
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { CASTERS } from "@/lib/site";
 
 interface Props {
   achievement: AchievementDTO;
@@ -10,26 +11,29 @@ interface Props {
 
 // One entry in The Record, laid out exactly like the original static
 // design: thumbnail (decider screenshot) with result badge and score
-// overlay, then the main column (kicker, title, card line, meta grid),
-// then a right side column with the final-score block on top and the
-// View match action at the bottom. On phones the card stays a
-// horizontal list row — compact thumbnail rail on the left, with the
-// final-score block and View match folded into the main column — never
-// a stacked card. The whole card is a button — one tap target, no
-// nested interactive elements.
+// overlay, then the main column (kicker, title, card line, casters row,
+// meta grid), then a right side column with the final-score block on
+// top and the View match action at the bottom. On phones the card
+// stays a horizontal list row — compact thumbnail rail on the left,
+// with the final-score block and View match folded into the main
+// column — never a stacked card. Click-to-open is a card-sized button
+// UNDERLAY: the visible content sits above it with pointer-events off,
+// so the whole card still opens the match, while the caster channel
+// links in the body are real links (pointer-events back on) that open
+// YouTube in a new tab and never trigger the card's open.
 export default function RecordCard({ achievement: a, onOpen }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
 
   return (
-    <article className="group border border-line bg-raise transition duration-300 hover:-translate-y-[3px] hover:border-linestrong hover:shadow-[0_14px_34px_rgba(0,0,0,0.45)] active:translate-y-0">
+    <article className="group relative border border-line bg-raise transition duration-300 hover:-translate-y-[3px] hover:border-linestrong hover:shadow-[0_14px_34px_rgba(0,0,0,0.45)] active:translate-y-0">
       <button
         type="button"
         onClick={() => onOpen(a.id)}
-        className="block w-full text-left"
+        className="absolute inset-0 block h-full w-full"
         aria-label={`View match ${matchLabel(a.matchNumber)} against ${a.opponent}`}
-      >
-        <div className="flex sm:flex-row">
+      />
+      <div className="pointer-events-none relative flex sm:flex-row">
           {/* Thumbnail — fixed box matching the original static design:
               300×188px on desktop; on phones a compact 124px rail that
               stretches to the row height, so the card reads as a list
@@ -96,6 +100,35 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
               {a.cardLine}
             </p>
 
+            {/* Casters — the guild's three official channels. Real
+                links above the card's button underlay (pointer-events
+                back on for this row only): they open YouTube in a new
+                tab and never open the match detail. */}
+            <div className="pointer-events-auto mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 sm:mt-3">
+              <span className="flex items-center gap-1.5 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-ink/40 sm:text-[0.68rem]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 shrink-0 text-brand"
+                >
+                  <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26.2 26.2 0 0 0 2 12a26.2 26.2 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26.2 26.2 0 0 0 22 12a26.2 26.2 0 0 0-.4-4.8ZM10 15.2V8.8L15.5 12Z" />
+                </svg>
+                Casters
+              </span>
+              {CASTERS.map((c) => (
+                <a
+                  key={c.channelUrl}
+                  href={c.channelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-line text-[0.8rem] font-medium text-ink/70 transition hover:text-brand sm:text-[0.85rem]"
+                >
+                  {c.name}
+                </a>
+              ))}
+            </div>
+
             <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 border-t border-line pt-3 sm:mt-4 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-4 sm:pt-[0.85rem] lg:grid-cols-5">
               <Meta label="Guild / Creator" value={a.opponent} />
               <Meta label="Date" value={formatDate(a.date)} />
@@ -128,8 +161,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
               View match →
             </span>
           </div>
-        </div>
-      </button>
+      </div>
     </article>
   );
 }
