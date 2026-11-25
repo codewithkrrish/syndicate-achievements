@@ -104,6 +104,7 @@ hashes (`#match-002`, `#about`) with working Back/Forward.
 | `mode`               | String  | e.g. Clash Squad.                       |
 | `map`                | String  | e.g. Bermuda.                           |
 | `cardLine`           | String  | Short line on the record card.          |
+| `thumbnailUrl`       | String? | Optional poster image for the record card; falls back to the decider screenshot. |
 | `createdAt/updatedAt`| DateTime|                                         |
 
 ### Game

@@ -92,6 +92,19 @@ export const achievementInputSchema = z
       .trim()
       .min(8, "Write the short card line")
       .max(160, "Card lines stay short — under 160 characters"),
+    // Optional poster image for the record card. Empty means the card
+    // falls back to the decider game's screenshot.
+    thumbnailUrl: z
+      .string()
+      .trim()
+      .max(2048)
+      .optional()
+      .transform((v) => (v ? v : null))
+      .refine(
+        (v) =>
+          v === null || v.startsWith("/") || /^https?:\/\//i.test(v),
+        "Thumbnail must be an uploaded image or a full http(s) URL",
+      ),
     games: z
       .array(gameInputSchema)
       .min(1, "A series has at least one game")

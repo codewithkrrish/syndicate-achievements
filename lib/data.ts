@@ -18,6 +18,7 @@ function toDTO(a: {
   mode: string;
   map: string;
   cardLine: string;
+  thumbnailUrl: string | null;
   games: {
     id: number;
     gameNumber: number;
@@ -41,6 +42,7 @@ function toDTO(a: {
     mode: a.mode,
     map: a.map,
     cardLine: a.cardLine,
+    thumbnailUrl: a.thumbnailUrl,
     games: [...a.games]
       .sort((x, y) => x.gameNumber - y.gameNumber)
       .map((g) => ({ ...g })),

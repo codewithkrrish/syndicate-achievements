@@ -3,8 +3,12 @@ import type { AchievementDTO } from "./types";
 // Pure presentation helpers — safe to import from client components
 // (no database code lives here).
 
-/** The screenshot used as a record card's thumbnail: the decider (last game). */
+/**
+ * The image used as a record card's thumbnail: the achievement's poster
+ * thumbnail when one is set, otherwise the decider (last game) screenshot.
+ */
 export function thumbnailOf(a: AchievementDTO): string | null {
+  if (a.thumbnailUrl) return a.thumbnailUrl;
   if (a.games.length === 0) return null;
   return a.games[a.games.length - 1].screenshotUrl;
 }

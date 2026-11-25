@@ -44,6 +44,9 @@ export default function AchievementForm({ initial, achievementId }: Props) {
   const [uploadingRow, setUploadingRow] = useState<number | null>(null);
   const [uploadErrors, setUploadErrors] = useState<Record<number, string>>({});
   const fileInputs = useRef<Record<number, HTMLInputElement | null>>({});
+  const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [thumbUploadError, setThumbUploadError] = useState("");
+  const thumbFileInput = useRef<HTMLInputElement | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
   const isEdit = achievementId !== undefined;
@@ -125,6 +128,32 @@ export default function AchievementForm({ initial, achievementId }: Props) {
     }
   };
 
+  // ---- Poster thumbnail upload (same route as screenshots) --------------
+  const handleThumbUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingThumb(true);
+    setThumbUploadError("");
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Upload failed. Paste an image URL instead.");
+      }
+      set("thumbnailUrl", data.url);
+    } catch (e) {
+      setThumbUploadError(
+        e instanceof Error ? e.message : "Upload failed.",
+      );
+    } finally {
+      setUploadingThumb(false);
+    }
+  };
+
   // ---- Submit -------------------------------------------------------------
   const payload = useMemo(() => {
     const num = (v: number | "") => (v === "" ? Number.NaN : Number(v));
@@ -139,6 +168,7 @@ export default function AchievementForm({ initial, achievementId }: Props) {
       mode: values.mode,
       map: values.map,
       cardLine: values.cardLine,
+      thumbnailUrl: values.thumbnailUrl,
       games: values.games.map((g) => ({
         scoreFor: num(g.scoreFor),
         scoreAgainst: num(g.scoreAgainst),
@@ -269,6 +299,89 @@ export default function AchievementForm({ initial, achievementId }: Props) {
               className={inputCls}
             />
           </Field>
+          <div className="sm:col-span-2">
+            <Field
+              label="Poster thumbnail (optional)"
+              error={err("thumbnailUrl")}
+            >
+              <div className="flex flex-col gap-4 md:flex-row">
+                <div className="w-full shrink-0 md:w-64">
+                  {values.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={values.thumbnailUrl}
+                      alt="Poster thumbnail preview"
+                      className="aspect-video w-full border border-line object-cover"
+                    />
+                  ) : (
+                    <div className="flex aspect-video w-full items-center justify-center border border-dashed border-linestrong bg-card px-3 text-center font-mono text-[10px] uppercase tracking-widest text-ink/35">
+                      No poster — card uses the decider screenshot
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={uploadingThumb}
+                      onClick={() => thumbFileInput.current?.click()}
+                      className="inline-flex min-h-10 items-center bg-brand px-4 font-condensed text-sm font-bold uppercase tracking-wider text-white transition hover:bg-branddeep disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {uploadingThumb
+                        ? "Uploading…"
+                        : values.thumbnailUrl
+                          ? "Replace image"
+                          : "Upload image"}
+                    </button>
+                    {values.thumbnailUrl && (
+                      <button
+                        type="button"
+                        onClick={() => set("thumbnailUrl", "")}
+                        className="inline-flex min-h-10 items-center border border-linestrong px-4 font-condensed text-sm font-semibold uppercase tracking-wider text-ink/70 transition hover:border-brand hover:text-brand"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <input
+                      ref={thumbFileInput}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handleThumbUpload(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-ink/45">
+                    JPG, PNG or WebP, up to 8 MB. Stored on Vercel Blob.
+                  </p>
+                  <label className="mt-3 block">
+                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
+                      …or paste an image URL
+                    </span>
+                    <input
+                      type="url"
+                      value={values.thumbnailUrl}
+                      onChange={(e) => set("thumbnailUrl", e.target.value)}
+                      placeholder="https://…/poster.jpg"
+                      className={inputCls}
+                    />
+                  </label>
+                  {thumbUploadError && (
+                    <p role="alert" className="mt-2 text-sm font-medium text-[#ff8a86]">
+                      {thumbUploadError}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Hint>
+                The designed “SYNDICATE vs opponent” poster shown on the
+                record card. Leave empty and the card falls back to the
+                deciding game&apos;s screenshot.
+              </Hint>
+            </Field>
+          </div>
         </div>
       </Section>
 
@@ -538,7 +651,7 @@ export default function AchievementForm({ initial, achievementId }: Props) {
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          disabled={submitting || uploadingRow !== null}
+          disabled={submitting || uploadingRow !== null || uploadingThumb}
           className="inline-flex min-h-12 items-center bg-brand px-7 font-condensed text-lg font-bold uppercase tracking-wider text-white transition hover:bg-branddeep disabled:cursor-wait disabled:opacity-60"
         >
           {submitting

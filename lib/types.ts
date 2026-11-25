@@ -23,6 +23,7 @@ export interface AchievementDTO {
   mode: string;
   map: string;
   cardLine: string;
+  thumbnailUrl: string | null;
   games: GameDTO[];
 }
 
@@ -38,6 +39,7 @@ export interface AchievementFormValues {
   mode: string;
   map: string;
   cardLine: string;
+  thumbnailUrl: string;
   games: {
     scoreFor: number | "";
     scoreAgainst: number | "";
@@ -57,5 +59,6 @@ export const EMPTY_FORM: AchievementFormValues = {
   mode: "Clash Squad",
   map: "",
   cardLine: "",
+  thumbnailUrl: "",
   games: [{ scoreFor: "", scoreAgainst: "", result: "Victory", screenshotUrl: "" }],
 };

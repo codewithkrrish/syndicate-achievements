@@ -33,6 +33,7 @@ export default async function EditAchievementPage({
     mode: achievement.mode,
     map: achievement.map,
     cardLine: achievement.cardLine,
+    thumbnailUrl: achievement.thumbnailUrl ?? "",
     games: achievement.games.map((g) => ({
       scoreFor: g.scoreFor,
       scoreAgainst: g.scoreAgainst,

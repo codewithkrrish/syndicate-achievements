@@ -33,7 +33,11 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={thumb}
-                alt={`${a.opponent} — deciding game screenshot`}
+                alt={
+                  a.thumbnailUrl
+                    ? `SYNDICATE vs ${a.opponent} — match poster`
+                    : `${a.opponent} — deciding game screenshot`
+                }
                 className="aspect-video h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
               />

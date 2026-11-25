@@ -25,6 +25,7 @@ async function main() {
     mode: "Clash Squad",
     map: "Bermuda",
     cardLine: "Went the distance — SYNDICATE beat NG Gamer.",
+    thumbnailUrl: "/seed/match-002-poster.jpg",
   };
 
   const games = [

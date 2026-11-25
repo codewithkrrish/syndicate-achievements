@@ -68,6 +68,7 @@ export async function createAchievement(input: unknown): Promise<ActionResult> {
         mode: data.mode,
         map: data.map,
         cardLine: data.cardLine,
+        thumbnailUrl: data.thumbnailUrl,
         games: {
           create: data.games.map((g, i) => ({
             gameNumber: i + 1,
@@ -119,6 +120,7 @@ export async function updateAchievement(
           mode: data.mode,
           map: data.map,
           cardLine: data.cardLine,
+          thumbnailUrl: data.thumbnailUrl,
           games: {
             create: data.games.map((g, i) => ({
               gameNumber: i + 1,

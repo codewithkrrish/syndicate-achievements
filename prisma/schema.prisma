@@ -29,6 +29,7 @@ model Achievement {
   mode               String
   map                String
   cardLine           String
+  thumbnailUrl       String?
   games              Game[]
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
