@@ -227,7 +227,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           }`}
           onClick={close}
         >
-          <div className="flex items-center justify-between gap-4 pb-4">
+          <div className="relative z-10 flex items-center justify-between gap-4 pb-4">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/70">
               Match {matchLabel(a.matchNumber)} · Game {lightbox.gameNumber} —{" "}
               {lightbox.result}, {lightbox.scoreFor} – {lightbox.scoreAgainst} ·{" "}
@@ -237,7 +237,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               type="button"
               onClick={close}
               aria-label="Close screenshot viewer"
-              className="flex h-12 w-12 shrink-0 items-center justify-center border border-linestrong bg-black/70 text-2xl text-white backdrop-blur-sm transition hover:border-brand hover:text-brand"
+              className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand text-2xl font-bold text-white shadow-[0_4px_18px_rgba(0,0,0,0.6)] transition hover:bg-branddeep"
             >
               ×
             </button>
