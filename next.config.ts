@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Security headers applied to every response. The admin area additionally
 // gets X-Robots-Tag via the route metadata + robots.ts, and is never linked
@@ -16,10 +17,12 @@ const securityHeaders = [
     // Content-Security-Policy. script-src/style-src keep 'unsafe-inline'
     // because Next injects inline runtime/style tags (there is no nonce
     // setup); fonts load from Google Fonts; img-src allows https: because
-    // admins may paste external screenshot URLs into a record.
+    // admins may paste external screenshot URLs into a record. connect-src
+    // additionally allows the Sentry ingest host so browser error reports
+    // can leave the page.
     key: "Content-Security-Policy",
     value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://o4512136254586880.ingest.de.sentry.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
   },
 ];
 
@@ -61,4 +64,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry wrapping: build-time only (component annotations + build plugin).
+// Source-map upload is disabled — no SENTRY_AUTH_TOKEN is kept anywhere for
+// this project; error events still report with full server-side context.
+export default withSentryConfig(nextConfig, {
+  org: "codeiwithkrrish",
+  project: "syndicate-achievements",
+  silent: true,
+  sourcemaps: { disable: true },
+});
