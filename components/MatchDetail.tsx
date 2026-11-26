@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { AchievementDTO, GameDTO } from "@/lib/types";
 import { formatDate, matchLabel, matchNumberPadded } from "@/lib/format";
 import { FORMAT_LABEL, type Format } from "@/lib/validation";
@@ -216,9 +217,15 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         ← Back to the record
       </button>
 
-      {/* Lightbox */}
-      {lightbox && (
-        <div
+      {/* Lightbox — portalled to <body> on purpose: rendered in place it
+          sits inside <main>'s stacking context (relative + z-10), so the
+          sticky header (z-50, a sibling subtree) painted OVER the viewer's
+          top strip and hid the caption row and most of the close button.
+          At body level the viewer's own z-index competes directly with
+          the header's and wins. */}
+      {lightbox &&
+        createPortal(
+          <div
           role="dialog"
           aria-modal="true"
           aria-label={`Game ${lightbox.gameNumber} screenshot`}
@@ -252,8 +259,9 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             decoding="async"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }
