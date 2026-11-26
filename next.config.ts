@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Security headers applied to every response. The admin area additionally
 // gets X-Robots-Tag via the route metadata + robots.ts, and is never linked
@@ -68,12 +67,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Sentry wrapping: build-time only (component annotations + build plugin).
-// Source-map upload is disabled — no SENTRY_AUTH_TOKEN is kept anywhere for
-// this project; error events still report with full server-side context.
-export default withSentryConfig(nextConfig, {
-  org: "codeiwithkrrish",
-  project: "syndicate-achievements",
-  silent: true,
-  sourcemaps: { disable: true },
-});
+// Deliberately NO withSentryConfig wrapper: Sentry's build plugin made
+// Netlify's build fail (every deploy from the Sentry commit onward never
+// shipped there, while Vercel and local builds passed). The Sentry SDK
+// itself needs no build plugin — instrumentation.ts + the three config
+// files initialise it at runtime, and error events report with full
+// server-side context. The plugin only added source-map upload (already
+// disabled — no SENTRY_AUTH_TOKEN is kept for this project) and component
+// name annotations, neither of which this site needs. Do not re-add the
+// wrapper without first proving a Netlify build passes with it.
+export default nextConfig;
