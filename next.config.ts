@@ -12,10 +12,20 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    // Content-Security-Policy. script-src/style-src keep 'unsafe-inline'
+    // because Next injects inline runtime/style tags (there is no nonce
+    // setup); fonts load from Google Fonts; img-src allows https: because
+    // admins may paste external screenshot URLs into a record.
+    key: "Content-Security-Policy",
+    value:
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  },
 ];
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   images: {
     // Screenshots live either in /public/seed or on Vercel Blob.
     remotePatterns: [

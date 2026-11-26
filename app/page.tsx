@@ -1,10 +1,11 @@
 import { getAchievements } from "@/lib/data";
 import PublicSite from "@/components/PublicSite";
 
-// The archive is read from the database on every request: an admin edit is
-// live the moment it is saved, with no rebuild and no cache to clear.
-// force-dynamic also keeps `next build` independent of a live database.
-export const dynamic = "force-dynamic";
+// The archive is cached and revalidated at most every 60 seconds (ISR).
+// Admin edits call revalidatePath("/") (see app/admin/actions.ts), so an
+// edit still appears the moment it is saved, while repeat visits in
+// between skip the database entirely.
+export const revalidate = 60;
 
 export default async function HomePage() {
   const achievements = await getAchievements();

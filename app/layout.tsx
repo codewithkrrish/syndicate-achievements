@@ -8,6 +8,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://syndicate.run.place"),
   title: {
     default: "SYNDICATE Achievements — Official Match Archive",
     template: "%s · SYNDICATE Achievements",
@@ -17,6 +18,27 @@ export const metadata: Metadata = {
   // The admin area carries its own noindex metadata; the public archive is
   // fine to index, but nothing here opts into anything beyond the basics.
   robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  // Share cards: when the archive link is pasted into Discord, WhatsApp or
+  // X, the hero arena shot and this title/description are what people see —
+  // and metadataBase makes the relative image path resolve to the live
+  // domain for crawlers.
+  openGraph: {
+    type: "website",
+    siteName: "SYNDICATE Achievements",
+    title: "SYNDICATE Achievements — Official Match Archive",
+    description:
+      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+    url: "/",
+    images: [{ url: "/seed/hero-arena.webp", alt: "SYNDICATE guild arena" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SYNDICATE Achievements — Official Match Archive",
+    description:
+      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+    images: ["/seed/hero-arena.webp"],
+  },
 };
 
 export default function RootLayout({
