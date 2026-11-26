@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { formatDate, matchHash, recordLabel, thumbnailOf } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
 import SiteFooter, { SiteBackdrop } from "./SiteFooter";
 import Reveal from "./Reveal";
@@ -20,7 +20,7 @@ function hashFor(view: View, achievements: AchievementDTO[]): string {
   if (view.name === "about") return "#about";
   if (view.name === "detail") {
     const a = achievements.find((x) => x.id === view.id);
-    return a ? `#match-${String(a.matchNumber).padStart(3, "0")}` : "#record";
+    return a ? matchHash(a) : "#record";
   }
   return "#record";
 }
@@ -28,11 +28,26 @@ function hashFor(view: View, achievements: AchievementDTO[]): string {
 function viewFromHash(achievements: AchievementDTO[]): View {
   const h = window.location.hash;
   if (h === "#about") return { name: "about" };
-  const m = h.match(/^#match-(\d+)$/);
-  if (m) {
-    const num = parseInt(m[1], 10);
-    const a = achievements.find((x) => x.matchNumber === num);
+  // Current scheme: the slug carries the record as well as the number
+  // (#creators-001 / #ordinary-001) — numbers restart in each record,
+  // so a bare number no longer identifies a match on its own.
+  const scoped = h.match(/^#(creators|ordinary)-(\d+)$/);
+  if (scoped) {
+    const num = parseInt(scoped[2], 10);
+    const a = achievements.find((x) =>
+      scoped[1] === "creators"
+        ? x.category === "CREATOR" && x.matchNumber === num
+        : x.category !== "CREATOR" && x.matchNumber === num,
+    );
     if (a) return { name: "detail", id: a.id };
+  }
+  // Legacy scheme from before per-record numbering (#match-002):
+  // follow the number when exactly one record carries it.
+  const legacy = h.match(/^#match-(\d+)$/);
+  if (legacy) {
+    const num = parseInt(legacy[1], 10);
+    const hits = achievements.filter((x) => x.matchNumber === num);
+    if (hits.length === 1) return { name: "detail", id: hits[0].id };
   }
   return { name: "list" };
 }
@@ -41,7 +56,7 @@ function viewFromHash(achievements: AchievementDTO[]): View {
 // entry for each of the two record collections. The full collections
 // live on their own pages (/creators-record, /ordinary-record); match
 // detail and About remain in-page views here so the long-standing hash
-// deep-links (#match-002, #about) keep working exactly as before.
+// deep-links (#creators-001, #about) keep working exactly as before.
 export default function PublicSite({
   achievements,
 }: {
@@ -126,7 +141,7 @@ export default function PublicSite({
     const lines: string[] = [];
     for (const a of achievements) {
       lines.push(
-        `Match ${matchLabel(a.matchNumber)} · SYNDICATE ${a.finalScore} ${a.opponent} — ${a.result}`,
+        `${recordLabel(a)} · SYNDICATE ${a.finalScore} ${a.opponent} — ${a.result}`,
       );
       for (const g of a.games) {
         lines.push(
@@ -380,7 +395,7 @@ function CategorySummary({
               type="button"
               onClick={() => onOpen(latest.id)}
               className="flex w-full items-center gap-3.5 px-4 py-4 text-left sm:gap-4 sm:px-5"
-              aria-label={`View the latest ${title} entry — match ${matchLabel(latest.matchNumber)} against ${latest.opponent}`}
+              aria-label={`View the latest ${title} entry — ${recordLabel(latest)} against ${latest.opponent}`}
             >
               {thumb && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -394,7 +409,8 @@ function CategorySummary({
               )}
               <span className="min-w-0 flex-1">
                 <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-brand sm:text-[11px]">
-                  Latest · Match {matchLabel(latest.matchNumber)}
+                  <span className="whitespace-nowrap">Latest ·</span>{" "}
+                  <span className="whitespace-nowrap">{recordLabel(latest)}</span>
                 </span>
                 <span className="mt-1 block truncate font-condensed text-xl font-bold uppercase leading-tight sm:text-2xl">
                   SYNDICATE <span className="text-ink/40">vs</span>{" "}

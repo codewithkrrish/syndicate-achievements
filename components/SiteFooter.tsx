@@ -2,7 +2,7 @@
 
 import type { AchievementDTO } from "@/lib/types";
 import { GUILD } from "@/lib/site";
-import { matchLabel } from "@/lib/format";
+import { recordLabel } from "@/lib/format";
 import EmberCanvas from "./EmberCanvas";
 import { useLoopPause } from "./useLoopPause";
 
@@ -55,7 +55,7 @@ export default function SiteFooter({
           <p className="mt-2 max-w-md text-[13px] leading-relaxed text-ink/50 sm:text-sm">
             The squad&rsquo;s official match archive.
             {latest
-              ? ` ${matchLabel(latest.matchNumber)} on file — ${achievements.length} ${
+              ? ` ${recordLabel(latest)} on file — ${achievements.length} ${
                   achievements.length === 1 ? "record" : "records"
                 } filed.`
               : " The first filed win is pending."}

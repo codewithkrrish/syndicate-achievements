@@ -25,6 +25,9 @@ interface Props {
   initial: AchievementFormValues;
   /** Present in edit mode; absent when creating. */
   achievementId?: number;
+  /** Create mode only: the next free match number in each record, so
+   *  the number field can follow the category picker. */
+  nextByCategory?: Record<string, number>;
 }
 
 type GameRow = AchievementFormValues["games"][number];
@@ -39,9 +42,16 @@ const labelCls =
 // & screenshots. Validation is server-side (Zod, in the server action) and
 // errors come back per field; this component renders them under the exact
 // field they belong to and never fails silently.
-export default function AchievementForm({ initial, achievementId }: Props) {
+export default function AchievementForm({
+  initial,
+  achievementId,
+  nextByCategory,
+}: Props) {
   const router = useRouter();
   const [values, setValues] = useState<AchievementFormValues>(initial);
+  // Create mode: the match number tracks the category's next free
+  // number until the admin types one of their own.
+  const [numberAuto, setNumberAuto] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -245,13 +255,21 @@ export default function AchievementForm({ initial, achievementId }: Props) {
               min={1}
               inputMode="numeric"
               value={values.matchNumber}
-              onChange={(e) =>
-                set("matchNumber", e.target.value === "" ? "" : Number(e.target.value))
-              }
-              placeholder="3"
+              onChange={(e) => {
+                setNumberAuto(false);
+                set(
+                  "matchNumber",
+                  e.target.value === "" ? "" : Number(e.target.value),
+                );
+              }}
+              placeholder={String(nextByCategory?.[values.category] ?? 1)}
               className={inputCls}
             />
-            <Hint>The next free number in the record. Must be unique.</Hint>
+            <Hint>
+              Each record numbers its own matches from #001 — this is the
+              next free number in the selected record. Must be unique
+              within the record.
+            </Hint>
           </Field>
           <Field label="Date" error={err("date")}>
             <input
@@ -308,7 +326,20 @@ export default function AchievementForm({ initial, achievementId }: Props) {
             <Field label="Record category" error={err("category")}>
               <select
                 value={values.category}
-                onChange={(e) => set("category", e.target.value)}
+                onChange={(e) => {
+                  const category = e.target.value;
+                  // Create mode: an untouched number field follows the
+                  // picker to the newly selected record's next number.
+                  if (!isEdit && numberAuto && nextByCategory?.[category]) {
+                    setValues((prev) => ({
+                      ...prev,
+                      category,
+                      matchNumber: nextByCategory[category],
+                    }));
+                  } else {
+                    set("category", category);
+                  }
+                }}
                 className={inputCls}
               >
                 {CATEGORIES.map((c) => (

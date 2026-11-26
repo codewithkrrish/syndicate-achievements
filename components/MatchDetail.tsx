@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { AchievementDTO, GameDTO } from "@/lib/types";
-import { formatDate, matchLabel, matchNumberPadded } from "@/lib/format";
+import { formatDate, matchNumberPadded, recordLabel } from "@/lib/format";
 import { FORMAT_LABEL, type Format } from "@/lib/validation";
 import { useLoopPause } from "./useLoopPause";
 
@@ -59,7 +59,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
   );
 
   return (
-    <section aria-label={`Match ${matchLabel(a.matchNumber)} in full`}>
+    <section aria-label={`${recordLabel(a)} in full`}>
       <button
         type="button"
         onClick={onBack}
@@ -75,8 +75,8 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         <span className="font-mono text-xs text-brand sm:text-sm">
           {matchNumberPadded(a.matchNumber)}
         </span>
-        <h2 className="font-condensed text-[1.7rem] font-bold uppercase leading-none sm:text-5xl">
-          Match {matchLabel(a.matchNumber)} — In Full
+        <h2 className="font-condensed text-[1.45rem] font-bold uppercase leading-none sm:text-5xl">
+          {recordLabel(a)} — In Full
         </h2>
       </div>
 
@@ -87,17 +87,24 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         className="anim-fade-rise flow-border mt-8 border-l-4 border-l-brand bg-raise shadow-panel"
         style={{ "--anim-delay": "120ms" } as React.CSSProperties}
       >
-        <p className="border-b border-line px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink/50 sm:px-7 sm:py-3 sm:text-[11px]">
-          <span className="pulse-dot mr-2 inline-block h-2 w-2 rounded-full bg-brand align-middle" />
-          Match {matchLabel(a.matchNumber)} · Filed from the #achievement channel
+        <p className="flex flex-wrap items-center gap-x-2 border-b border-line px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.12em] text-ink/50 sm:px-7 sm:py-3 sm:text-[11px] sm:tracking-[0.22em]">
+          <span className="pulse-dot inline-block h-2 w-2 shrink-0 rounded-full bg-brand" />
+          <span className="whitespace-nowrap">{recordLabel(a)}</span>
+          <span className="whitespace-nowrap">
+            · Filed from the #achievement channel
+          </span>
         </p>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-5 sm:gap-x-8 sm:gap-y-4 sm:px-7 sm:py-6">
-          <div>
-            <p className="font-condensed text-[1.75rem] font-bold uppercase leading-none sm:text-5xl">
+        {/* One line on phones by design: the row never wraps below sm,
+            the type is tightened to fit, and the opponent name (the
+            only variable-length piece) truncates instead of dropping
+            to a second line. Desktop wraps and sizes exactly as before. */}
+        <div className="flex flex-nowrap items-center gap-x-2.5 px-3 py-4 sm:flex-wrap sm:gap-x-8 sm:gap-y-4 sm:px-7 sm:py-6">
+          <div className="shrink-0">
+            <p className="font-condensed text-[1.3rem] font-bold uppercase leading-none sm:text-5xl">
               SYNDICATE
             </p>
           </div>
-          <p className="score-pop font-condensed text-5xl font-bold leading-none sm:text-7xl">
+          <p className="score-pop shrink-0 font-condensed text-[2.1rem] font-bold leading-none sm:text-7xl">
             <span className={isWin ? "text-brand" : "text-ink/50"}>
               {a.finalScore.split("–")[0]?.trim() ?? a.finalScore}
             </span>
@@ -105,13 +112,13 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             <span>{a.finalScore.split("–")[1]?.trim() ?? ""}</span>
           </p>
           <span
-            className={`chip-shine px-3 py-1.5 font-condensed text-base font-bold uppercase tracking-wider text-white sm:text-lg ${
+            className={`chip-shine shrink-0 px-2 py-1 font-condensed text-xs font-bold uppercase tracking-wider text-white sm:px-3 sm:py-1.5 sm:text-lg ${
               isWin ? "bg-brand" : "bg-zinc-600"
             }`}
           >
             {a.result}
           </span>
-          <p className="font-condensed text-[1.75rem] font-bold uppercase leading-none text-ink/85 sm:text-5xl">
+          <p className="min-w-0 truncate font-condensed text-[1.3rem] font-bold uppercase leading-none text-ink/85 sm:text-5xl">
             {a.opponent}
           </p>
         </div>
@@ -202,7 +209,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={g.screenshotUrl}
-                alt={`Match ${matchLabel(a.matchNumber)}, game ${g.gameNumber} result screen — ${g.result}, ${g.scoreFor} to ${g.scoreAgainst}`}
+                alt={`${recordLabel(a)}, game ${g.gameNumber} result screen — ${g.result}, ${g.scoreFor} to ${g.scoreAgainst}`}
                 className="img-in aspect-video w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
                 decoding="async"
@@ -280,8 +287,8 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           onClick={close}
         >
           <div className="relative z-10 flex items-center justify-between gap-4 pb-4">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/70">
-              Match {matchLabel(a.matchNumber)} · Game {lightbox.gameNumber} —{" "}
+            <p className="min-w-0 font-mono text-xs uppercase tracking-[0.2em] text-ink/70">
+              {recordLabel(a)} · Game {lightbox.gameNumber} —{" "}
               {lightbox.result}, {lightbox.scoreFor} – {lightbox.scoreAgainst} ·{" "}
               {a.mode}, {a.map}
             </p>

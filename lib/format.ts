@@ -34,3 +34,30 @@ export function matchLabel(matchNumber: number): string {
 export function matchNumberPadded(matchNumber: number): string {
   return String(matchNumber).padStart(3, "0");
 }
+
+/**
+ * Category-scoped match label — each record numbers its own matches
+ * from #001, so a bare number is never enough to identify a match:
+ * "Creators Record #001" / "Ordinary Record #001". Anything not filed
+ * as CREATOR reads as Ordinary, the same rule the collections use.
+ */
+export function recordLabel(a: {
+  category: string;
+  matchNumber: number;
+}): string {
+  const record = a.category === "CREATOR" ? "Creators" : "Ordinary";
+  return `${record} Record ${matchLabel(a.matchNumber)}`;
+}
+
+/**
+ * Category-scoped hash slug for a match detail deep link:
+ * "#creators-001" / "#ordinary-001". Numbers repeat across records,
+ * so the slug has to carry the record too.
+ */
+export function matchHash(a: {
+  category: string;
+  matchNumber: number;
+}): string {
+  const record = a.category === "CREATOR" ? "creators" : "ordinary";
+  return `#${record}-${matchNumberPadded(a.matchNumber)}`;
+}

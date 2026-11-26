@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getAchievementById } from "@/lib/data";
-import { matchLabel } from "@/lib/format";
+import { recordLabel } from "@/lib/format";
 import type { AchievementFormValues } from "@/lib/types";
 import AdminShell from "@/components/admin/AdminShell";
 import AchievementForm from "@/components/admin/AchievementForm";
@@ -46,7 +46,7 @@ export default async function EditAchievementPage({
   return (
     <AdminShell active="dashboard">
       <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand">
-        Editing · Match {matchLabel(achievement.matchNumber)}
+        Editing · {recordLabel(achievement)}
       </p>
       <h1 className="mt-2 font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
         SYNDICATE vs {achievement.opponent}

@@ -58,13 +58,42 @@ export async function getAchievements(): Promise<AchievementDTO[]> {
   try {
     const rows = await prisma.achievement.findMany({
       include: includeGames,
-      orderBy: { matchNumber: "desc" },
+      // Match numbers repeat across records now (each record numbers
+      // its own matches from #001), so "newest first" is by date; the
+      // number and id only break ties deterministically.
+      orderBy: [{ date: "desc" }, { matchNumber: "desc" }, { id: "desc" }],
     });
     return rows.map(toDTO);
   } catch (err) {
     console.error("[data] getAchievements failed:", err);
     return [];
   }
+}
+
+/**
+ * The next free match number in each record — numbering is scoped per
+ * record (max filed number in that record + 1), never global. Used to
+ * prefill the admin create form.
+ */
+export async function getNextMatchNumbers(): Promise<{
+  CREATOR: number;
+  ORDINARY: number;
+}> {
+  const next = { CREATOR: 1, ORDINARY: 1 };
+  try {
+    const grouped = await prisma.achievement.groupBy({
+      by: ["category"],
+      _max: { matchNumber: true },
+    });
+    for (const g of grouped) {
+      const n = (g._max.matchNumber ?? 0) + 1;
+      if (g.category === "CREATOR") next.CREATOR = n;
+      else next.ORDINARY = n;
+    }
+  } catch (err) {
+    console.error("[data] getNextMatchNumbers failed:", err);
+  }
+  return next;
 }
 
 export async function getAchievementById(
@@ -121,4 +150,4 @@ export async function getAdminStats(): Promise<AdminStats> {
 
 /** The screenshot used as a record card's thumbnail lives in lib/format.ts
  *  (client-safe). This module stays server-only because it imports Prisma. */
-export { thumbnailOf, formatDate, matchLabel } from "./format";
+export { thumbnailOf, formatDate, matchLabel, recordLabel } from "./format";

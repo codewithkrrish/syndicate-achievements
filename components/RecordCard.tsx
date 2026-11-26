@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
 interface Props {
   achievement: AchievementDTO;
@@ -54,7 +54,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
         type="button"
         onClick={() => onOpen(a.id)}
         className="block w-full text-left"
-        aria-label={`View match ${matchLabel(a.matchNumber)} against ${a.opponent}`}
+        aria-label={`View ${recordLabel(a)} against ${a.opponent}`}
       >
         <div className="flex flex-col sm:flex-row">
           {/* Thumbnail — fixed box matching the original static design:
@@ -99,7 +99,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
           {/* Main column */}
           <div className="min-w-0 flex-1 px-3.5 pb-[0.4rem] pt-3.5 sm:px-[1.15rem] sm:pb-[1.1rem] sm:pt-[1.05rem]">
             <p className="text-[0.66rem] font-bold uppercase tracking-[0.2em] text-brand sm:text-[0.74rem]">
-              Match {matchLabel(a.matchNumber)} · Achievement
+              {recordLabel(a)}
             </p>
             <h3 className="mt-1 font-condensed text-[1.55rem] font-bold uppercase leading-none sm:mt-1.5 sm:text-4xl">
               SYNDICATE <span className="text-ink/40">vs</span> {a.opponent}

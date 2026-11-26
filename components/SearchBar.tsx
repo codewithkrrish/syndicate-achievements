@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
 interface Props {
   achievements: AchievementDTO[];
@@ -187,7 +187,7 @@ export default function SearchBar({
                       <Highlighted text={a.opponent} query={query} />
                     </span>
                     <span className="block truncate text-xs text-ink/50">
-                      {matchLabel(a.matchNumber)} · {formatDate(a.date)} · {a.mode} ·{" "}
+                      {recordLabel(a)} · {formatDate(a.date)} · {a.mode} ·{" "}
                       {a.map} · {a.format}
                     </span>
                   </span>

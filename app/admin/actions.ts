@@ -36,7 +36,7 @@ function refreshPublicSite() {
 function friendlyDbError(err: unknown): string {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
-      return "That match number is already on file. Match numbers must be unique — pick the next free number.";
+      return "That match number is already on file in this record. Each record numbers its own matches — pick the next free number in this record.";
     }
     if (err.code === "P2025") {
       return "That achievement no longer exists. It may already have been deleted.";

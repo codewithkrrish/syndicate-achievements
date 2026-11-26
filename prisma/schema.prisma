@@ -19,7 +19,7 @@ datasource db {
 
 model Achievement {
   id                 Int      @id @default(autoincrement())
-  matchNumber        Int      @unique
+  matchNumber        Int
   opponent           String
   opponentChannelUrl String?
   result             String // "WIN" | "LOSS" (validated in app code)
@@ -35,6 +35,9 @@ model Achievement {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  // Match numbers are scoped per record: Creators and Ordinary each
+  // number their own matches from #001, so uniqueness is composite.
+  @@unique([category, matchNumber])
   @@index([date])
 }
 

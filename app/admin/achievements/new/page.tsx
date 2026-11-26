@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { EMPTY_FORM } from "@/lib/types";
+import { getNextMatchNumbers } from "@/lib/data";
 import AdminShell from "@/components/admin/AdminShell";
 import AchievementForm from "@/components/admin/AchievementForm";
 
@@ -11,6 +12,14 @@ export const dynamic = "force-dynamic";
 export default async function NewAchievementPage() {
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
+
+  // Match numbers are scoped per record: the form opens on the next
+  // free number in the default record and follows the category picker.
+  const nextByCategory = await getNextMatchNumbers();
+  const initial = {
+    ...EMPTY_FORM,
+    matchNumber: nextByCategory[EMPTY_FORM.category as "CREATOR" | "ORDINARY"],
+  };
 
   return (
     <AdminShell active="new">
@@ -23,7 +32,7 @@ export default async function NewAchievementPage() {
         as entered, so check them once before saving.
       </p>
       <div className="mt-6">
-        <AchievementForm initial={EMPTY_FORM} />
+        <AchievementForm initial={initial} nextByCategory={nextByCategory} />
       </div>
     </AdminShell>
   );

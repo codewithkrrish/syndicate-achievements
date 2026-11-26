@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
 
-// Seed: the record's first filed entry — Match #002 vs NG Gamer.
-// Idempotent: re-running updates the same row (matched by its unique
-// matchNumber) and rebuilds its games, so `npm run db:seed` is always safe.
+// Seed: the Creators Record's first filed entry — Creators Record
+// #001 vs NG Gamer. Idempotent: re-running updates the same row
+// (matched by its unique (category, matchNumber) pair) and rebuilds
+// its games, so `npm run db:seed` is always safe.
 //
 // The opponent's YouTube channel link is intentionally null: it has not
 // been verified yet, and the site only shows the channel bar when a real
@@ -37,7 +38,7 @@ async function main() {
   }
 
   const data = {
-    matchNumber: 2,
+    matchNumber: 1,
     opponent: "NG Gamer",
     opponentChannelUrl: null as string | null,
     result: "WIN",
@@ -58,7 +59,12 @@ async function main() {
   ];
 
   const achievement = await prisma.achievement.upsert({
-    where: { matchNumber: data.matchNumber },
+    where: {
+      category_matchNumber: {
+        category: data.category,
+        matchNumber: data.matchNumber,
+      },
+    },
     update: data,
     create: data,
   });
@@ -69,7 +75,7 @@ async function main() {
   });
 
   console.log(
-    `Seeded Match #${String(data.matchNumber).padStart(3, "0")} vs ${data.opponent} (${games.length} games).`,
+    `Seeded Creators Record #${String(data.matchNumber).padStart(3, "0")} vs ${data.opponent} (${games.length} games).`,
   );
 }
 

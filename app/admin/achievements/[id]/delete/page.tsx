@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getAchievementById } from "@/lib/data";
-import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 import AdminShell from "@/components/admin/AdminShell";
 import DeleteConfirm from "@/components/admin/DeleteConfirm";
 
@@ -29,7 +29,7 @@ export default async function DeleteAchievementPage({
   return (
     <AdminShell active="dashboard">
       <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand">
-        Delete · Match {matchLabel(a.matchNumber)}
+        Delete · {recordLabel(a)}
       </p>
       <h1 className="mt-2 font-condensed text-4xl font-bold uppercase leading-none sm:text-5xl">
         Remove this achievement?
@@ -51,7 +51,7 @@ export default async function DeleteAchievementPage({
           )}
           <div className="min-w-0 flex-1 p-5 sm:p-6">
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-brand">
-              Match {matchLabel(a.matchNumber)} · {formatDate(a.date, "long")}
+              {recordLabel(a)} · {formatDate(a.date, "long")}
             </p>
             <h2 className="mt-1.5 font-condensed text-3xl font-bold uppercase leading-tight">
               SYNDICATE vs {a.opponent}
