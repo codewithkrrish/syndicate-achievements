@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
 
 // Seed: the record's first filed entry — Match #002 vs NG Gamer.
@@ -8,12 +10,32 @@ import { PrismaClient } from "@prisma/client";
 // been verified yet, and the site only shows the channel bar when a real
 // link is on file. Add it later from the admin panel — never invent one.
 //
-// Screenshots are the real result screens from the guild's archive, copied
-// into public/seed/ with the project.
+// Screenshots are the real result screens from the guild's archive. They
+// are inserted into the database itself (StoredImage, under fixed seed
+// ids) and referenced as /api/images/<id> — the files in public/seed/
+// are only the seed source, never served to visitors.
 
 const prisma = new PrismaClient();
 
+// Fixed ids keep the seed idempotent: each run deletes and recreates
+// exactly these rows instead of piling up duplicates.
+const SEED_IMAGES = [
+  { id: "seed-match-002-game1", file: "match-002-game1.jpg" },
+  { id: "seed-match-002-game2", file: "match-002-game2.jpg" },
+  { id: "seed-match-002-game3", file: "match-002-game3.jpg" },
+] as const;
+
 async function main() {
+  await prisma.storedImage.deleteMany({
+    where: { id: { in: SEED_IMAGES.map((img) => img.id) } },
+  });
+  for (const img of SEED_IMAGES) {
+    const data = readFileSync(join(process.cwd(), "public/seed", img.file));
+    await prisma.storedImage.create({
+      data: { id: img.id, mimeType: "image/jpeg", data },
+    });
+  }
+
   const data = {
     matchNumber: 2,
     opponent: "NG Gamer",
@@ -29,9 +51,9 @@ async function main() {
   };
 
   const games = [
-    { gameNumber: 1, scoreFor: 7, scoreAgainst: 6, result: "Victory", screenshotUrl: "/seed/match-002-game1.jpg" },
-    { gameNumber: 2, scoreFor: 1, scoreAgainst: 7, result: "Defeat", screenshotUrl: "/seed/match-002-game2.jpg" },
-    { gameNumber: 3, scoreFor: 7, scoreAgainst: 4, result: "Victory", screenshotUrl: "/seed/match-002-game3.jpg" },
+    { gameNumber: 1, scoreFor: 7, scoreAgainst: 6, result: "Victory", screenshotUrl: "/api/images/seed-match-002-game1" },
+    { gameNumber: 2, scoreFor: 1, scoreAgainst: 7, result: "Defeat", screenshotUrl: "/api/images/seed-match-002-game2" },
+    { gameNumber: 3, scoreFor: 7, scoreAgainst: 4, result: "Victory", screenshotUrl: "/api/images/seed-match-002-game3" },
   ];
 
   const achievement = await prisma.achievement.upsert({

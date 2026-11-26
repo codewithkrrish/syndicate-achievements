@@ -50,3 +50,14 @@ model Game {
   @@unique([achievementId, gameNumber])
   @@index([achievementId])
 }
+
+// Screenshots uploaded in the admin panel are stored as bytes in the
+// database itself (never on the host's disk or a host-specific blob store),
+// so the archive is identical on any host that points at this database.
+// Served via /api/images/[id].
+model StoredImage {
+  id        String   @id @default(cuid())
+  mimeType  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}

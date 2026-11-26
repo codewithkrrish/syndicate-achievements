@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/validation";
 
 // Screenshot upload for the admin panel.
@@ -8,8 +8,9 @@ import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/validation";
 // 1. Middleware rejects unauthenticated /api/admin/* calls with 401.
 // 2. This handler verifies the session AGAIN server-side (defense in depth).
 // 3. Type and size are validated before anything is stored.
-// 4. Files land in Vercel Blob under a namespaced path with a random
-//    suffix — the original filename is never trusted as a path.
+// 4. The bytes are stored in the database itself (StoredImage) and served
+//    back from /api/images/<id> — no host-side storage, no filenames, so
+//    uploads work identically on any host that points at this database.
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) {
@@ -45,30 +46,14 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return NextResponse.json(
-      {
-        error:
-          "Uploads are not configured on this deployment (missing BLOB_READ_WRITE_TOKEN). Paste an image URL instead.",
-      },
-      { status: 501 },
-    );
-  }
-
-  const safeBase = file.name
-    .replace(/\.[^.]+$/, "")
-    .replace(/[^a-zA-Z0-9-_]+/g, "-")
-    .slice(0, 40) || "screenshot";
-
   try {
-    const blob = await put(`achievements/${safeBase}.${ext}`, file, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType: file.type,
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const row = await prisma.storedImage.create({
+      data: { mimeType: file.type, data: bytes },
     });
-    return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url: `/api/images/${row.id}` });
   } catch (err) {
-    console.error("[upload] Blob put failed:", err);
+    console.error("[upload] StoredImage create failed:", err);
     return NextResponse.json(
       { error: "Upload failed on the server. Try again, or paste an image URL." },
       { status: 502 },
