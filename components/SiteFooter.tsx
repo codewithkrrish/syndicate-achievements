@@ -3,11 +3,13 @@
 import type { AchievementDTO } from "@/lib/types";
 import { GUILD } from "@/lib/site";
 import { recordLabel } from "@/lib/format";
-import EmberCanvas from "./EmberCanvas";
 import { useLoopPause } from "./useLoopPause";
 
 /** The animated backdrop shared by every public page: two drifting red
- *  glows plus the ember canvas. */
+ *  glows, clipped to the viewport by their fixed, overflow-hidden
+ *  wrapper. The ember canvas is NOT part of the backdrop — it lives
+ *  inside the home hero only, so its particles never drift over the
+ *  record pages or the match detail. */
 export function SiteBackdrop() {
   return (
     <>
@@ -18,7 +20,6 @@ export function SiteBackdrop() {
         <div className="bg-glow bg-glow-a anim-loop" />
         <div className="bg-glow bg-glow-b anim-loop" />
       </div>
-      <EmberCanvas />
     </>
   );
 }

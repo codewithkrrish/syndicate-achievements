@@ -5,6 +5,7 @@ import type { AchievementDTO } from "@/lib/types";
 import { formatDate, matchHash, recordLabel, thumbnailOf } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
 import SiteFooter, { SiteBackdrop } from "./SiteFooter";
+import EmberCanvas from "./EmberCanvas";
 import Reveal from "./Reveal";
 import MatchDetail from "./MatchDetail";
 import AboutView from "./AboutView";
@@ -178,6 +179,10 @@ export default function PublicSite({
                 className="img-in absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-[#050506]/60 via-[#050506]/25 to-[#050506]/90" />
+              {/* Embers live inside the hero box only — the section
+                  clips them (overflow-hidden), so they never wander
+                  over the rest of the page or the screen edges. */}
+              <EmberCanvas />
               <div className="relative mx-auto max-w-6xl px-4 pb-8 pt-12 sm:px-6 sm:pb-10 sm:pt-24">
                 <p className="anim-fade-rise flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#ffb3b0] sm:text-xs">
                   <span className="h-0.5 w-8 bg-brand" aria-hidden />

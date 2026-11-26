@@ -2,10 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-// Rising-ember particle layer for the public site's animated background.
-// Deliberately cheap: capped device-pixel-ratio, a small particle budget
-// (smaller on phones), paused when the tab is hidden, and fully disabled
-// for prefers-reduced-motion.
+// Rising-ember particle layer, mounted ONLY inside the home hero —
+// the canvas is absolutely positioned within the hero section (which
+// clips it with overflow-hidden), so embers can never drift over the
+// rest of the page or appear at the screen edges further down.
+// Deliberately cheap: capped device-pixel-ratio, a small particle
+// budget (smaller on phones), drawing paused when the tab is hidden
+// or the hero is off-screen, and fully disabled for
+// prefers-reduced-motion.
 export default function EmberCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -18,7 +22,8 @@ export default function EmberCanvas() {
     if (!ctx) return;
 
     let raf = 0;
-    let running = true;
+    let running = true; // tab visible
+    let inView = true; // hero on screen
     let w = 0;
     let h = 0;
 
@@ -34,13 +39,16 @@ export default function EmberCanvas() {
     let embers: Ember[] = [];
 
     const resize = () => {
+      // Size to the hero container, never the window: the canvas is
+      // confined to the hero box, so its particles stay inside it.
+      const host = canvas.parentElement;
+      if (!host) return;
+      const rect = host.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      w = window.innerWidth;
-      h = window.innerHeight;
+      w = Math.max(1, Math.floor(rect.width));
+      h = Math.max(1, Math.floor(rect.height));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const count = w < 640 ? 26 : 44;
       embers = Array.from({ length: count }, () => ({
@@ -55,7 +63,8 @@ export default function EmberCanvas() {
     };
 
     const tick = (t: number) => {
-      if (!running) return;
+      raf = requestAnimationFrame(tick);
+      if (!running || !inView) return;
       ctx.clearRect(0, 0, w, h);
       for (const e of embers) {
         e.y -= e.speed;
@@ -69,26 +78,37 @@ export default function EmberCanvas() {
         ctx.fillStyle = `rgba(229, 80, 60, ${e.alpha})`;
         ctx.fill();
       }
-      raf = requestAnimationFrame(tick);
     };
 
     const onVisibility = () => {
-      if (document.hidden) {
-        running = false;
-        cancelAnimationFrame(raf);
-      } else if (!running) {
-        running = true;
-        raf = requestAnimationFrame(tick);
-      }
+      running = !document.hidden;
     };
 
     resize();
     raf = requestAnimationFrame(tick);
-    window.addEventListener("resize", resize);
+
+    // Re-measure when the hero box itself changes size, and only draw
+    // while the hero is actually on screen.
+    const host = canvas.parentElement;
+    const ro =
+      host && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(resize)
+        : null;
+    if (host && ro) ro.observe(host);
+    else window.addEventListener("resize", resize);
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver((entries) => {
+            inView = entries[0]?.isIntersecting ?? true;
+          })
+        : null;
+    if (io) io.observe(canvas);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      if (ro) ro.disconnect();
+      else window.removeEventListener("resize", resize);
+      if (io) io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
@@ -97,7 +117,7 @@ export default function EmberCanvas() {
     <canvas
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 opacity-70"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
     />
   );
 }
