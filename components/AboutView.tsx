@@ -108,7 +108,7 @@ export default function AboutView({ onBack }: Props) {
         </h3>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60 sm:text-[15px]">
           SYNDICATE is run by five owners. They lead the guild, pick the squad
-          for guild-vs-guild series, and file every win into this archive.
+          for guild-vs-guild matches, and file every win into this archive.
         </p>
       </Reveal>
       <div
@@ -148,7 +148,7 @@ export default function AboutView({ onBack }: Props) {
         </h3>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60 sm:text-[15px]">
           Three content creators cast SYNDICATE&rsquo;s matches on behalf of the
-          guild — live commentary, match coverage and the guild&rsquo;s series
+          guild — live commentary, match coverage and the guild&rsquo;s matches
           as they happen.
         </p>
       </Reveal>
@@ -186,7 +186,7 @@ export default function AboutView({ onBack }: Props) {
           Guild matches are organised in the guild&rsquo;s official Discord —
           announcements, match scheduling and every new achievement land there
           first. Follow the guild on Instagram for posters, highlights and
-          updates between series.
+          updates between matches.
         </p>
       </Reveal>
       <div className="mt-6 space-y-3">

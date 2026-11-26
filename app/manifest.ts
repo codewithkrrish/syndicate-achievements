@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "SYNDICATE Achievements — Official Match Archive",
     short_name: "SYNDICATE",
     description:
-      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild match on record, with scores and screenshots for every game.",
     start_url: "/",
     display: "standalone",
     background_color: "#0b0b0d",

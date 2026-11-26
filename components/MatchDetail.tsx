@@ -161,7 +161,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           Per-game breakdown
         </h3>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60 sm:text-[15px]">
-          Every game in the series gets its own block — its score, its Victory or
+          Every game in the match gets its own block — its score, its Victory or
           Defeat label, and its own result screen. Tap any screenshot to view it
           large.
         </p>

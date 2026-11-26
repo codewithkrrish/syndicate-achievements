@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s · SYNDICATE Achievements",
   },
   description:
-    "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+    "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild match on record, with scores and screenshots for every game.",
   // The admin area carries its own noindex metadata; the public archive is
   // fine to index, but nothing here opts into anything beyond the basics.
   robots: { index: true, follow: true },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "SYNDICATE Achievements",
     title: "SYNDICATE Achievements — Official Match Archive",
     description:
-      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild match on record, with scores and screenshots for every game.",
     url: "/",
     images: [{ url: "/seed/hero-arena.webp", alt: "SYNDICATE guild arena" }],
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SYNDICATE Achievements — Official Match Archive",
     description:
-      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild series on record, with scores and screenshots for every game.",
+      "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild match on record, with scores and screenshots for every game.",
     images: ["/seed/hero-arena.webp"],
   },
 };

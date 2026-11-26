@@ -188,19 +188,17 @@ export default function PublicSite({
   // Hero stats (count-up) and the results ticker — both derived from the
   // same record data the cards show; nothing here is new copy, just the
   // archive's own numbers and scorelines.
+  // All four stats are match-level: one achievement is one complete
+  // match (a BO3 counts once — its games are never tallied here).
   const stats = useMemo(() => {
-    const series = achievements.length;
-    const seriesWon = achievements.filter((a) => a.result === "WIN").length;
-    const games = achievements.reduce((n, a) => n + a.games.length, 0);
-    const gamesWon = achievements.reduce(
-      (n, a) => n + a.games.filter((g) => g.result === "Victory").length,
-      0,
-    );
+    const played = achievements.length;
+    const wins = achievements.filter((a) => a.result === "WIN").length;
+    const losses = achievements.filter((a) => a.result === "LOSS").length;
     return {
-      series,
-      seriesWon,
-      games,
-      winRate: games > 0 ? Math.round((gamesWon / games) * 100) : 0,
+      played,
+      wins,
+      losses,
+      winRate: played > 0 ? Math.round((wins / played) * 100) : 0,
     };
   }, [achievements]);
 
@@ -334,7 +332,7 @@ export default function PublicSite({
                   className="anim-fade-rise mt-4 max-w-xl text-sm leading-relaxed text-ink/75 sm:mt-5 sm:text-base"
                   style={{ "--anim-delay": "140ms" } as React.CSSProperties}
                 >
-                  Every guild-vs-guild series the squad has filed — final
+                  Every guild-vs-guild match the squad has filed — final
                   scores, every game, every result screen. Nothing here is a
                   claim; it is all on record.
                 </p>
@@ -366,16 +364,16 @@ export default function PublicSite({
                     className="anim-fade-rise mt-8 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-4 border-t border-white/10 pt-5 sm:mt-10 sm:grid-cols-4 sm:gap-y-5 sm:pt-6"
                     style={{ "--anim-delay": "280ms" } as React.CSSProperties}
                   >
-                    <HeroStat label="Series filed">
-                      <CountUp value={stats.series} />
+                    <HeroStat label="Total Match Played">
+                      <CountUp value={stats.played} />
                     </HeroStat>
-                    <HeroStat label="Series won">
-                      <CountUp value={stats.seriesWon} />
+                    <HeroStat label="Total Win">
+                      <CountUp value={stats.wins} />
                     </HeroStat>
-                    <HeroStat label="Games played">
-                      <CountUp value={stats.games} />
+                    <HeroStat label="Total Lost">
+                      <CountUp value={stats.losses} />
                     </HeroStat>
-                    <HeroStat label="Game win rate">
+                    <HeroStat label="Win Rate">
                       <CountUp value={stats.winRate} />
                       <span className="text-brand">%</span>
                     </HeroStat>
@@ -421,7 +419,7 @@ export default function PublicSite({
               id="creators-record"
               number="01"
               title="Creators Record"
-              blurb="Series filed against creator-led teams — opponents who run a YouTube or Instagram channel."
+              blurb="Records filed against creator-led teams — opponents who run a YouTube or Instagram channel."
               records={creators}
               onOpen={openMatch}
             />
@@ -429,7 +427,7 @@ export default function PublicSite({
               id="ordinary-record"
               number="02"
               title="Ordinary Record"
-              blurb="Series filed against regular in-game guilds."
+              blurb="Records filed against regular in-game guilds."
               records={ordinary}
               onOpen={openMatch}
               divided
@@ -452,7 +450,7 @@ export default function PublicSite({
                 </p>
                 <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">
                   It may have been removed from the archive. The full record is
-                  still there — head back and pick another series.
+                  still there — head back and pick another record.
                 </p>
                 <button
                   type="button"
@@ -493,8 +491,8 @@ export default function PublicSite({
               The squad&rsquo;s official match archive.
               {latest
                 ? ` ${matchLabel(latest.matchNumber)} on file — ${achievements.length} ${
-                    achievements.length === 1 ? "series" : "series"
-                  } in the record.`
+                    achievements.length === 1 ? "record" : "records"
+                  } filed.`
                 : " The first filed win is pending."}
             </p>
           </div>
@@ -591,7 +589,7 @@ function RecordSection({
               </p>
               <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-ink/55 sm:text-sm">
                 Nothing has been filed in this collection yet. When the guild
-                files a series here, it will show with its score and result
+                files a record here, it will show with its score and result
                 screens.
               </p>
             </div>
