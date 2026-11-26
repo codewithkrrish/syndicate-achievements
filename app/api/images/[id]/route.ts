@@ -5,9 +5,11 @@ import { prisma } from "@/lib/db";
 // counterpart to the admin upload route. Intentionally public: the public
 // site displays these screenshots, and nothing sensitive lives in an image
 // row. Ids are unique per upload and the bytes behind an id never change,
-// so responses are cached as immutable for a year.
+// so responses are cached as immutable for a year, and the ETag (id + byte
+// length — a complete fingerprint here, since the bytes never change) lets
+// repeat requests revalidate with a body-less 304.
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
@@ -24,10 +26,27 @@ export async function GET(
     return NextResponse.json({ error: "Image not found" }, { status: 404 });
   }
 
+  const etag = `"${id}-${row.data.length}"`;
+  const cacheHeaders = {
+    "Cache-Control": "public, max-age=31536000, immutable",
+    ETag: etag,
+  };
+
+  const ifNoneMatch = req.headers.get("if-none-match");
+  if (
+    ifNoneMatch &&
+    ifNoneMatch
+      .split(",")
+      .map((t) => t.trim().replace(/^W\//, ""))
+      .includes(etag)
+  ) {
+    return new NextResponse(null, { status: 304, headers: cacheHeaders });
+  }
+
   return new NextResponse(Buffer.from(row.data), {
     headers: {
+      ...cacheHeaders,
       "Content-Type": row.mimeType,
-      "Cache-Control": "public, max-age=31536000, immutable",
     },
   });
 }
