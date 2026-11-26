@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, matchHash, recordLabel, thumbnailOf } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
@@ -171,12 +172,16 @@ export default function PublicSite({
               ref={heroRef}
               className="relative overflow-hidden border-b border-line"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {/* Hero art via next/image with priority: the LCP element
+                  gets a right-sized optimized variant and loads first;
+                  everything below the fold stays lazy. */}
+              <Image
                 src="/seed/hero-arena.webp"
                 alt=""
-                fetchPriority="high"
-                className="img-in absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
+                fill
+                priority
+                sizes="100vw"
+                className="img-in object-cover object-[center_62%] opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-[#050506]/60 via-[#050506]/25 to-[#050506]/90" />
               {/* Embers live inside the hero box only — the section
@@ -403,13 +408,12 @@ function CategorySummary({
               aria-label={`View the latest ${title} entry — ${recordLabel(latest)} against ${latest.opponent}`}
             >
               {thumb && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={thumb}
                   alt=""
+                  width={288}
+                  height={162}
                   className="aspect-video w-24 shrink-0 border border-line object-cover sm:w-36"
-                  loading="lazy"
-                  decoding="async"
                 />
               )}
               <span className="min-w-0 flex-1">

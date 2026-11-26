@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
@@ -62,19 +63,20 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
               The frame owns the size; it never stretches with the body. */}
           <div className="relative aspect-video w-full shrink-0 self-start overflow-hidden sm:aspect-auto sm:h-[188px] sm:w-[300px]">
             {thumb ? (
-              // Plain <img>: screenshot URLs are admin-managed (Blob or any
-              // pasted URL), so next/image host restrictions don't apply here.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              // next/image: the optimizer serves a right-sized WebP/AVIF
+              // variant of the screenshot (full-size originals stay behind
+              // /api/images for the lightbox). The frame owns the size —
+              // fill + object-cover keeps the exact settled crop.
+              <Image
                 src={thumb}
                 alt={
                   a.thumbnailUrl
                     ? `SYNDICATE vs ${a.opponent} — match poster`
                     : `${a.opponent} — deciding game screenshot`
                 }
-                className="img-in h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                loading="lazy"
-                decoding="async"
+                fill
+                sizes="(max-width: 639px) 100vw, 300px"
+                className="img-in object-cover transition duration-500 group-hover:scale-[1.03]"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">

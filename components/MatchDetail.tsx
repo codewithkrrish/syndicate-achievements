@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import type { AchievementDTO, GameDTO } from "@/lib/types";
 import { formatDate, matchNumberPadded, recordLabel } from "@/lib/format";
 import { FORMAT_LABEL, type Format } from "@/lib/validation";
@@ -203,16 +204,17 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             <button
               type="button"
               onClick={() => setLightbox(g)}
-              className="sheen-host relative block w-full overflow-hidden"
+              className="sheen-host relative block aspect-video w-full overflow-hidden"
               aria-label={`View game ${g.gameNumber} screenshot large`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {/* Optimized variant for the inline view; the lightbox
+                  below still opens the original full-size URL. */}
+              <Image
                 src={g.screenshotUrl}
                 alt={`${recordLabel(a)}, game ${g.gameNumber} result screen — ${g.result}, ${g.scoreFor} to ${g.scoreAgainst}`}
-                className="img-in aspect-video w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                loading="lazy"
-                decoding="async"
+                fill
+                sizes="(max-width: 768px) 100vw, 1152px"
+                className="img-in object-cover transition duration-500 group-hover:scale-[1.02]"
               />
               <span aria-hidden className="card-sheen" />
             </button>

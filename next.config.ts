@@ -30,9 +30,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: {
-    // Screenshots live either in /public/seed or on Vercel Blob.
+    // Screenshots are served from the DB route (/api/images, same-origin)
+    // or pasted by the admin as external https URLs; the optimizer must
+    // accept both, so any https host is allowed (records are written by
+    // the single trusted admin, and the CSP already permits https: imgs).
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "**" },
     ],
   },
   async headers() {
