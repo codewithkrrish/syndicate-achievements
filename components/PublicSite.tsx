@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AchievementDTO } from "@/lib/types";
-import { GUILD } from "@/lib/site";
-import { formatDate, matchLabel } from "@/lib/format";
-import EmberCanvas from "./EmberCanvas";
-import RecordCard from "./RecordCard";
+import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import SiteHeader from "./SiteHeader";
+import SiteFooter, { SiteBackdrop } from "./SiteFooter";
 import Reveal from "./Reveal";
 import MatchDetail from "./MatchDetail";
 import AboutView from "./AboutView";
@@ -38,25 +37,21 @@ function viewFromHash(achievements: AchievementDTO[]): View {
   return { name: "list" };
 }
 
-// The public archive as one page with three views (record list / match
-// detail / about), mirroring the V1 site's behaviour — including hash
-// deep-links (#match-002, #about) and working Back/Forward.
+// The home page: hero, match-level stats, results ticker, and a summary
+// entry for each of the two record collections. The full collections
+// live on their own pages (/creators-record, /ordinary-record); match
+// detail and About remain in-page views here so the long-standing hash
+// deep-links (#match-002, #about) keep working exactly as before.
 export default function PublicSite({
   achievements,
 }: {
   achievements: AchievementDTO[];
 }) {
   const [view, setView] = useState<View>({ name: "list" });
-  const [activeSection, setActiveSection] = useState<"creators" | "ordinary">(
-    "creators",
-  );
-  const [scrolled, setScrolled] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
   // Continuous loops pause while their section is off-screen.
   const heroRef = useLoopPause<HTMLElement>();
   const tickerRef = useLoopPause<HTMLDivElement>();
-  const footerRef = useLoopPause<HTMLElement>();
 
   // Initial view from the URL hash (deep links).
   useEffect(() => {
@@ -74,54 +69,6 @@ export default function PublicSite({
       window.removeEventListener("hashchange", onPop);
     };
   }, [achievements]);
-
-  // Header scroll state (depth shadow) + the top scroll-progress line.
-  // The progress bar is mutated directly through its ref — no React
-  // re-render per scroll frame — and the shadow state only flips when
-  // the page crosses the threshold, so scrolling stays cheap.
-  useEffect(() => {
-    let ticking = false;
-    let lastScrolled = false;
-    const update = () => {
-      ticking = false;
-      const y = window.scrollY;
-      const isScrolled = y > 8;
-      if (isScrolled !== lastScrolled) {
-        lastScrolled = isScrolled;
-        setScrolled(isScrolled);
-      }
-      const max =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? Math.min(y / max, 1) : 0;
-      if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${p})`;
-      }
-    };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
-  // Hidden tabs pause every continuous CSS loop (see .tab-hidden in
-  // globals.css). The ember canvas pauses itself the same way.
-  useEffect(() => {
-    const onVisibility = () =>
-      document.documentElement.classList.toggle("tab-hidden", document.hidden);
-    onVisibility();
-    document.addEventListener("visibilitychange", onVisibility);
-    return () =>
-      document.removeEventListener("visibilitychange", onVisibility);
-  }, []);
 
   const navigate = useCallback(
     (next: View) => {
@@ -142,24 +89,6 @@ export default function PublicSite({
   const goList = useCallback(() => navigate({ name: "list" }), [navigate]);
   const goAbout = useCallback(() => navigate({ name: "about" }), [navigate]);
 
-  // The record is two collections now. The header nav lands on the list
-  // view and scrolls to the chosen collection's section.
-  const goSection = useCallback(
-    (section: "creators" | "ordinary") => {
-      setActiveSection(section);
-      navigate({ name: "list" });
-      // Wait for the list view to mount before scrolling to the section.
-      window.setTimeout(() => {
-        document
-          .getElementById(
-            section === "creators" ? "creators-record" : "ordinary-record",
-          )
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 90);
-    },
-    [navigate],
-  );
-
   // Anything not filed as CREATOR reads as Ordinary, so a record can
   // never fall out of both collections.
   const creators = useMemo(
@@ -175,15 +104,6 @@ export default function PublicSite({
     view.name === "detail"
       ? achievements.find((a) => a.id === view.id) ?? null
       : null;
-
-  // Back from a match lands on the collection that match is filed under.
-  const backFromDetail = useCallback(
-    () =>
-      goSection(selected?.category === "CREATOR" ? "creators" : "ordinary"),
-    [goSection, selected],
-  );
-
-  const latest = achievements[0];
 
   // Hero stats (count-up) and the results ticker — both derived from the
   // same record data the cards show; nothing here is new copy, just the
@@ -220,81 +140,12 @@ export default function PublicSite({
 
   return (
     <div className="relative min-h-dvh">
-      {/* Animated background */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
-        <div className="bg-glow bg-glow-a anim-loop" />
-        <div className="bg-glow bg-glow-b anim-loop" />
-      </div>
-      <EmberCanvas />
-
-      {/* Header */}
-      <header
-        className={`anim-fade-in sticky top-0 z-50 border-b border-line bg-bg/88 backdrop-blur-md transition-shadow duration-300 ${
-          scrolled ? "shadow-[0_12px_32px_rgba(0,0,0,0.5)]" : ""
-        }`}
-      >
-        {/* Scroll progress — a thin red line at the very top, filled by
-            the scroll listener through a ref (transform only). */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[2px]"
-          aria-hidden
-        >
-          <div
-            ref={progressRef}
-            className="h-full origin-left bg-brand"
-            style={{ transform: "scaleX(0)" }}
-          />
-        </div>
-        <div className="mx-auto flex max-w-6xl flex-col px-3 sm:flex-row sm:items-stretch sm:gap-2 sm:px-6">
-          <button
-            type="button"
-            onClick={goList}
-            className="flex min-w-0 items-center gap-2.5 py-2.5 text-left sm:gap-3 sm:py-3"
-            aria-label="SYNDICATE Achievements — home"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/guild-logo.webp"
-              alt=""
-              width={40}
-              height={40}
-              decoding="async"
-              className="logo-glow anim-loop h-8 w-8 shrink-0 object-cover sm:h-10 sm:w-10"
-            />
-            <span className="leading-none">
-              <span className="block font-condensed text-[17px] font-bold uppercase tracking-wide sm:text-[22px]">
-                SYNDICATE
-              </span>
-              <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.3em] text-ink/55 sm:text-[10px] sm:tracking-[0.34em]">
-                Achievements
-              </span>
-            </span>
-          </button>
-          {/* Two record collections + About. On phones the three longer
-              labels get their own row under the brand — one line each,
-              nothing squeezed; from sm up it is the settled single row. */}
-          <nav
-            className="flex items-stretch border-t border-line/60 sm:ml-auto sm:border-t-0"
-            aria-label="Site"
-          >
-            <NavButton
-              active={view.name !== "about" && activeSection === "creators"}
-              onClick={() => goSection("creators")}
-            >
-              Creators Record
-            </NavButton>
-            <NavButton
-              active={view.name !== "about" && activeSection === "ordinary"}
-              onClick={() => goSection("ordinary")}
-            >
-              Ordinary Record
-            </NavButton>
-            <NavButton active={view.name === "about"} onClick={goAbout}>
-              About Us
-            </NavButton>
-          </nav>
-        </div>
-      </header>
+      <SiteBackdrop />
+      <SiteHeader
+        active={view.name === "about" ? "about" : null}
+        onAbout={goAbout}
+        onHome={goList}
+      />
 
       <main ref={mainRef} className="relative z-10 scroll-mt-20">
         {view.name === "list" && (
@@ -340,17 +191,12 @@ export default function PublicSite({
                   className="anim-fade-rise mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row"
                   style={{ "--anim-delay": "210ms" } as React.CSSProperties}
                 >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      document
-                        .getElementById("creators-record")
-                        ?.scrollIntoView({ behavior: "smooth" })
-                    }
+                  <a
+                    href="/creators-record"
                     className="inline-flex min-h-11 items-center justify-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep sm:min-h-12 sm:px-7 sm:text-lg"
                   >
                     Browse the record
-                  </button>
+                  </a>
                   <button
                     type="button"
                     onClick={goAbout}
@@ -414,20 +260,21 @@ export default function PublicSite({
               </div>
             )}
 
-            {/* The record, in its two collections */}
-            <RecordSection
-              id="creators-record"
+            {/* The two collections — summaries only; each full record
+                lives on its own page. */}
+            <CategorySummary
               number="01"
               title="Creators Record"
               blurb="Records filed against creator-led teams — opponents who run a YouTube or Instagram channel."
+              href="/creators-record"
               records={creators}
               onOpen={openMatch}
             />
-            <RecordSection
-              id="ordinary-record"
+            <CategorySummary
               number="02"
               title="Ordinary Record"
               blurb="Records filed against regular in-game guilds."
+              href="/ordinary-record"
               records={ordinary}
               onOpen={openMatch}
               divided
@@ -442,7 +289,7 @@ export default function PublicSite({
             className="view-enter mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8"
           >
             {selected ? (
-              <MatchDetail achievement={selected} onBack={backFromDetail} />
+              <MatchDetail achievement={selected} onBack={goList} />
             ) : (
               <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
                 <p className="font-condensed text-3xl font-bold uppercase">
@@ -474,95 +321,41 @@ export default function PublicSite({
         )}
       </main>
 
-      {/* Footer — guild links only, never personal links. */}
-      <footer
-        ref={footerRef}
-        className="footer-flow relative z-10 border-t border-line bg-[#08080a]"
-      >
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6 sm:py-10 md:flex-row md:items-center">
-          <div>
-            <p className="font-condensed text-xl font-bold uppercase leading-none sm:text-2xl">
-              SYNDICATE{" "}
-              <span className="title-shine title-shine-red anim-loop">
-                Achievements
-              </span>
-            </p>
-            <p className="mt-2 max-w-md text-[13px] leading-relaxed text-ink/50 sm:text-sm">
-              The squad&rsquo;s official match archive.
-              {latest
-                ? ` ${matchLabel(latest.matchNumber)} on file — ${achievements.length} ${
-                    achievements.length === 1 ? "record" : "records"
-                  } filed.`
-                : " The first filed win is pending."}
-            </p>
-          </div>
-          <nav
-            className="flex flex-wrap gap-x-7 gap-y-3 md:ml-auto"
-            aria-label="Guild links"
-          >
-            <a
-              href={GUILD.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-line font-condensed text-sm font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand sm:text-base"
-            >
-              {GUILD.instagramHandle}
-            </a>
-            <a
-              href={GUILD.discordUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-line font-condensed text-sm font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand sm:text-base"
-            >
-              Discord
-            </a>
-            <button
-              type="button"
-              onClick={goAbout}
-              className="link-line font-condensed text-sm font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand sm:text-base"
-            >
-              About Us
-            </button>
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="link-line font-condensed text-sm font-semibold uppercase tracking-wider text-ink/70 transition hover:text-brand sm:text-base"
-            >
-              Back to top
-            </button>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter achievements={achievements} onAbout={goAbout} />
     </div>
   );
 }
 
-/** One of the record's two collections on the home view: its own
- *  numbered heading, a one-line statement of Krrish's filing rule, and
- *  either its cards or a clean empty line. */
-function RecordSection({
-  id,
+/** One collection's entry on the home page: its heading and filing
+ *  rule, a preview of its latest record (tap opens the match), its
+ *  record count, and a clear link through to the collection's own
+ *  page — where the full list lives. */
+function CategorySummary({
   number,
   title,
   blurb,
+  href,
   records,
   onOpen,
   divided = false,
   className = "",
 }: {
-  id: string;
   number: string;
   title: string;
   blurb: string;
+  href: string;
   records: AchievementDTO[];
   onOpen: (id: number) => void;
   divided?: boolean;
   className?: string;
 }) {
+  const latest = records[0];
+  const thumb = latest ? thumbnailOf(latest) : null;
+  const isWin = latest?.result === "WIN";
+
   return (
     <section
-      id={id}
-      className={`mx-auto max-w-6xl scroll-mt-28 px-4 pb-12 pt-8 sm:scroll-mt-24 sm:px-6 sm:pb-14 sm:pt-10 ${
+      className={`mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 sm:pb-14 sm:pt-10 ${
         divided ? "border-t border-line" : ""
       } ${className}`}
     >
@@ -580,28 +373,72 @@ function RecordSection({
         </p>
       </Reveal>
 
-      <div className="mt-5 space-y-4 sm:mt-6">
-        {records.length === 0 ? (
-          <Reveal>
-            <div className="border border-dashed border-linestrong bg-raise px-5 py-9 text-center sm:px-6 sm:py-11">
-              <p className="font-condensed text-xl font-bold uppercase sm:text-2xl">
-                No records filed yet
-              </p>
-              <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-ink/55 sm:text-sm">
-                Nothing has been filed in this collection yet. When the guild
-                files a record here, it will show with its score and result
-                screens.
-              </p>
-            </div>
-          </Reveal>
-        ) : (
-          records.map((a, i) => (
-            <Reveal key={a.id} delay={Math.min(i * 75, 300)}>
-              <RecordCard achievement={a} onOpen={onOpen} />
-            </Reveal>
-          ))
-        )}
-      </div>
+      <Reveal className="mt-5 sm:mt-6" delay={60}>
+        <div className="border border-line bg-raise">
+          {latest ? (
+            <button
+              type="button"
+              onClick={() => onOpen(latest.id)}
+              className="flex w-full items-center gap-3.5 px-4 py-4 text-left sm:gap-4 sm:px-5"
+              aria-label={`View the latest ${title} entry — match ${matchLabel(latest.matchNumber)} against ${latest.opponent}`}
+            >
+              {thumb && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={thumb}
+                  alt=""
+                  className="aspect-video w-24 shrink-0 border border-line object-cover sm:w-36"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-brand sm:text-[11px]">
+                  Latest · Match {matchLabel(latest.matchNumber)}
+                </span>
+                <span className="mt-1 block truncate font-condensed text-xl font-bold uppercase leading-tight sm:text-2xl">
+                  SYNDICATE <span className="text-ink/40">vs</span>{" "}
+                  {latest.opponent}
+                </span>
+                <span className="mt-0.5 block truncate text-[13px] text-ink/55 sm:text-sm">
+                  {formatDate(latest.date)} · {latest.mode} · {latest.map} ·{" "}
+                  {latest.format}
+                </span>
+              </span>
+              <span
+                className={`shrink-0 px-2.5 py-1.5 text-center font-condensed text-base font-bold leading-none text-white sm:text-lg ${
+                  isWin ? "bg-brand" : "bg-zinc-600"
+                }`}
+              >
+                {latest.finalScore}
+                <span className="mt-0.5 block text-[10px] font-semibold tracking-[0.18em] opacity-85">
+                  {latest.result}
+                </span>
+              </span>
+            </button>
+          ) : (
+            <p className="px-4 py-6 text-[13px] leading-relaxed text-ink/55 sm:px-5 sm:text-sm">
+              <span className="font-condensed text-lg font-bold uppercase text-ink sm:text-xl">
+                No records filed yet.
+              </span>{" "}
+              When the guild files a record in this collection, the latest
+              one will be previewed here.
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line px-4 py-3 sm:px-5">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/45">
+              {records.length}{" "}
+              {records.length === 1 ? "record" : "records"} filed
+            </span>
+            <a
+              href={href}
+              className="ml-auto font-condensed text-sm font-bold uppercase tracking-wider text-brand transition hover:text-[#ff6b66] sm:text-base"
+            >
+              View the {title} →
+            </a>
+          </div>
+        </div>
+      </Reveal>
     </section>
   );
 }
@@ -622,33 +459,5 @@ function HeroStat({
         {label}
       </p>
     </div>
-  );
-}
-
-function NavButton({
-  children,
-  onClick,
-  active = false,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  active?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`nav-btn relative flex min-h-10 items-center whitespace-nowrap px-1.5 font-condensed text-xs font-semibold uppercase tracking-wider transition sm:min-h-11 sm:px-4 sm:text-base ${
-        active ? "text-ink" : "text-ink/60 hover:text-ink"
-      }`}
-    >
-      {children}
-      {/* Sliding underline: scales in from the left on hover/focus, and
-          rests fully open on the active view (see .nav-underline). */}
-      <span
-        aria-hidden
-        className={`nav-underline${active ? " nav-underline-active" : ""}`}
-      />
-    </button>
   );
 }
