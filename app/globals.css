@@ -8,6 +8,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Backup safeguard only (the real fixes live on the elements
+     themselves): no decorative overshoot may ever widen the page.
+     `clip` is used rather than `hidden` so the sticky header keeps
+     working — clip creates no scroll container. */
+  overflow-x: clip;
 }
 
 body {
@@ -703,7 +708,16 @@ body {
   animation: shine-move 4.6s ease-in-out infinite;
 }
 
-/* --- Footer: a red segment travels the top line --- */
+/* --- Footer: a red segment travels the top line ---
+   The segment's travel deliberately overshoots both edges (it fades
+   in from the left and out at the right), so the footer MUST clip
+   it: unclipped, the overshoot past the right edge widened the
+   page's scrollable area on phones — a blank strip down the right
+   side that visitors could pan into. Clipped, the effect inside
+   the footer is unchanged and the page is exactly viewport-wide. */
+.footer-flow {
+  overflow: hidden;
+}
 .footer-flow::after {
   content: "";
   position: absolute;
