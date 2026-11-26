@@ -87,6 +87,19 @@ body {
   }
 }
 
+/* Phones: the drifting blurred glows are the most expensive paint on
+   low-end GPUs. Keep the glow, drop the constant repaint — static glows
+   with a lighter blur read the same at phone sizes. */
+@media (max-width: 640px) {
+  .bg-glow {
+    filter: blur(56px);
+  }
+  .bg-glow-a,
+  .bg-glow-b {
+    animation: none;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Search highlight + live dropdown                                    */
 /* ------------------------------------------------------------------ */

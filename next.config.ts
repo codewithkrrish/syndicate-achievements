@@ -23,7 +23,31 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        // Seed artwork and the guild logo change only via a redeploy, so
+        // browsers may keep them briefly — repeat visits skip re-downloading
+        // the heavy images, and stale-while-revalidate keeps a swapped
+        // screenshot from sticking around.
+        source: "/seed/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/guild-logo.webp",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
   },
 };
 

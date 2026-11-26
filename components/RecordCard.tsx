@@ -44,6 +44,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
                 }
                 className="img-in h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
+                decoding="async"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-card font-mono text-xs uppercase tracking-widest text-ink/30">

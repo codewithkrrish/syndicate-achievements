@@ -198,6 +198,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
                 alt={`Match ${matchLabel(a.matchNumber)}, game ${g.gameNumber} result screen — ${g.result}, ${g.scoreFor} to ${g.scoreAgainst}`}
                 className="img-in aspect-video w-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
             </button>
             <p className="px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/45">
@@ -248,6 +249,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             className={`min-h-0 flex-1 object-contain ${
               closing ? "lightbox-img-out" : "lightbox-img-in"
             }`}
+            decoding="async"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

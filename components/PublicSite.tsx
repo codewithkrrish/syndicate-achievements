@@ -116,24 +116,27 @@ export default function PublicSite({
 
       {/* Header */}
       <header className="anim-fade-in sticky top-0 z-50 border-b border-line bg-bg/88 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-stretch gap-2 px-4 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-stretch gap-1 px-3 sm:gap-2 sm:px-6">
           <button
             type="button"
             onClick={goList}
-            className="flex items-center gap-3 py-3 text-left"
+            className="flex min-w-0 items-center gap-2.5 py-3 text-left sm:gap-3"
             aria-label="SYNDICATE Achievements — home"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/guild-logo.png"
+              src="/guild-logo.webp"
               alt=""
-              className="h-10 w-10 shrink-0 object-cover"
+              width={40}
+              height={40}
+              decoding="async"
+              className="h-9 w-9 shrink-0 object-cover sm:h-10 sm:w-10"
             />
             <span className="leading-none">
-              <span className="block font-condensed text-[22px] font-bold uppercase tracking-wide">
+              <span className="block font-condensed text-[19px] font-bold uppercase tracking-wide sm:text-[22px]">
                 SYNDICATE
               </span>
-              <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.34em] text-ink/55">
+              <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.3em] text-ink/55 sm:text-[10px] sm:tracking-[0.34em]">
                 Achievements
               </span>
             </span>
@@ -162,6 +165,7 @@ export default function PublicSite({
               <img
                 src="/seed/hero-arena.webp"
                 alt=""
+                fetchPriority="high"
                 className="img-in absolute inset-0 h-full w-full object-cover object-[center_62%] opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-[#050506]/60 via-[#050506]/25 to-[#050506]/90" />
@@ -383,7 +387,7 @@ function NavButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-11 items-center border-b-2 px-3 font-condensed text-[15px] font-semibold uppercase tracking-wider transition sm:px-4 sm:text-base ${
+      className={`flex min-h-11 items-center whitespace-nowrap border-b-2 px-2 font-condensed text-sm font-semibold uppercase tracking-wider transition sm:px-4 sm:text-base ${
         active
           ? "border-brand text-ink"
           : "border-transparent text-ink/60 hover:text-ink"

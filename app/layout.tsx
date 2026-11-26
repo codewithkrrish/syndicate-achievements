@@ -1,5 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+// Phone browser chrome matches the site's near-black background instead of
+// flashing white while the page loads.
+export const viewport: Viewport = {
+  themeColor: "#0b0b0d",
+};
 
 export const metadata: Metadata = {
   title: {
