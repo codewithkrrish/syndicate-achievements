@@ -1,20 +1,16 @@
 import type { Metadata } from "next";
-import { getRecordIndex } from "@/lib/data";
-import { matchNumberPadded } from "@/lib/format";
 import MatchDetailPage, {
   matchMetadata,
 } from "@/components/MatchDetailPage";
 
 // Shareable standalone match page — see components/MatchDetailPage.tsx.
-// Same ISR rhythm as the collection pages; admin edits revalidate it.
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const index = await getRecordIndex();
-  return index
-    .filter((r) => r.category === "CREATOR")
-    .map((r) => ({ number: matchNumberPadded(r.matchNumber) }));
-}
+// Rendered dynamically on purpose: under ISR, a notFound() response for
+// an unknown number gets cached and later served with a 200 status (a
+// soft 404 — search engines would index the error page). Dynamic
+// rendering returns a true 404 every time, and these share targets are
+// low-traffic, so the per-visit database read costs nothing that
+// matters. The collection pages above stay ISR-cached as before.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
