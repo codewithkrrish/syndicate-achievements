@@ -237,7 +237,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               type="button"
               onClick={close}
               aria-label="Close screenshot viewer"
-              className="flex h-12 w-12 shrink-0 items-center justify-center border border-linestrong text-2xl text-ink transition hover:border-brand hover:text-brand"
+              className="flex h-12 w-12 shrink-0 items-center justify-center border border-linestrong bg-black/70 text-2xl text-white backdrop-blur-sm transition hover:border-brand hover:text-brand"
             >
               ×
             </button>
