@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
+import { CATEGORY_LABEL, type Category } from "@/lib/validation";
 
 // Dashboard achievement list with live search (opponent / match number)
 // and a result filter. Filtering is client-side: the whole archive is
@@ -135,7 +136,8 @@ export default function AchievementList({
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-brand">
                     Match {matchLabel(a.matchNumber)} · {a.format} ·{" "}
-                    {formatDate(a.date)}
+                    {formatDate(a.date)} ·{" "}
+                    {CATEGORY_LABEL[a.category as Category] ?? a.category}
                   </p>
                   <h3 className="mt-1 truncate font-condensed text-2xl font-bold uppercase leading-tight">
                     SYNDICATE vs {a.opponent}

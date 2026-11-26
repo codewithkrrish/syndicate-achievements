@@ -82,13 +82,13 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
               </div>
             )}
             <span
-              className={`absolute left-3 top-3 px-2.5 py-1 font-condensed text-sm font-bold uppercase tracking-wider text-white ${
+              className={`absolute left-3 top-3 px-2.5 py-1 font-condensed text-[13px] font-bold uppercase tracking-wider text-white sm:text-sm ${
                 isWin ? "bg-brand badge-fx anim-loop" : "bg-zinc-600"
               }`}
             >
               {a.result}
             </span>
-            <span className="absolute bottom-3 right-3 bg-black/75 px-2.5 py-1 font-condensed text-lg font-bold leading-none text-white">
+            <span className="absolute bottom-3 right-3 bg-black/75 px-2.5 py-1 font-condensed text-base font-bold leading-none text-white sm:text-lg">
               {a.finalScore}
             </span>
             {/* Light sweep across the thumbnail — plays once when the
@@ -97,18 +97,18 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
           </div>
 
           {/* Main column */}
-          <div className="min-w-0 flex-1 px-4 pb-[0.4rem] pt-4 sm:px-[1.15rem] sm:pb-[1.1rem] sm:pt-[1.05rem]">
-            <p className="text-[0.74rem] font-bold uppercase tracking-[0.2em] text-brand">
+          <div className="min-w-0 flex-1 px-3.5 pb-[0.4rem] pt-3.5 sm:px-[1.15rem] sm:pb-[1.1rem] sm:pt-[1.05rem]">
+            <p className="text-[0.66rem] font-bold uppercase tracking-[0.2em] text-brand sm:text-[0.74rem]">
               Match {matchLabel(a.matchNumber)} · Achievement
             </p>
-            <h3 className="mt-1.5 font-condensed text-3xl font-bold uppercase leading-none sm:text-4xl">
+            <h3 className="mt-1 font-condensed text-[1.55rem] font-bold uppercase leading-none sm:mt-1.5 sm:text-4xl">
               SYNDICATE <span className="text-ink/40">vs</span> {a.opponent}
             </h3>
-            <p className="mt-2 max-w-[36rem] text-[0.95rem] leading-normal text-ink/65">
+            <p className="mt-1.5 max-w-[36rem] text-[0.875rem] leading-normal text-ink/65 sm:mt-2 sm:text-[0.95rem]">
               {a.cardLine}
             </p>
 
-            <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-[0.85rem] sm:grid-cols-3 lg:grid-cols-5">
+            <dl className="mt-3.5 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-line pt-3 sm:mt-4 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-4 sm:pt-[0.85rem] lg:grid-cols-5">
               <Meta label="Guild / Creator" value={a.opponent} />
               <Meta label="Date" value={formatDate(a.date)} />
               <Meta label="Mode" value={a.mode} />
@@ -120,16 +120,16 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
           {/* Side column — final score top-right, View match bottom-right.
               On mobile it becomes a bottom row under a divider, like the
               static design. */}
-          <div className="mt-[0.35rem] flex shrink-0 items-center justify-between gap-4 border-t border-line px-4 py-3 sm:mt-0 sm:flex-col sm:items-end sm:justify-between sm:border-t-0 sm:pb-[1.1rem] sm:pl-0 sm:pr-[1.15rem] sm:pt-[1.05rem] sm:text-right">
+          <div className="mt-[0.35rem] flex shrink-0 items-center justify-between gap-4 border-t border-line px-3.5 py-2.5 sm:mt-0 sm:flex-col sm:items-end sm:justify-between sm:border-t-0 sm:pb-[1.1rem] sm:pl-0 sm:pr-[1.15rem] sm:pt-[1.05rem] sm:text-right">
             <div className="flex items-baseline gap-2 sm:block">
-              <span className="whitespace-nowrap font-condensed text-[2rem] font-bold leading-none text-brand">
+              <span className="whitespace-nowrap font-condensed text-[1.65rem] font-bold leading-none text-brand sm:text-[2rem]">
                 {a.finalScore}
               </span>
-              <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-ink/40 sm:mt-[0.3rem] sm:block">
+              <span className="text-[0.64rem] font-bold uppercase tracking-[0.16em] text-ink/40 sm:mt-[0.3rem] sm:block sm:text-[0.7rem]">
                 Final score
               </span>
             </div>
-            <span className="whitespace-nowrap text-[0.84rem] font-bold uppercase tracking-[0.1em] text-brand">
+            <span className="whitespace-nowrap text-[0.78rem] font-bold uppercase tracking-[0.1em] text-brand sm:text-[0.84rem]">
               View match →
             </span>
           </div>
@@ -145,7 +145,7 @@ function Meta({ label, value }: { label: string; value: string }) {
       <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/40">
         {label}
       </dt>
-      <dd className="mt-0.5 truncate text-sm font-medium text-ink/90" title={value}>
+      <dd className="mt-0.5 truncate text-[13px] font-medium text-ink/90 sm:text-sm" title={value}>
         {value}
       </dd>
     </div>

@@ -7,12 +7,26 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const RESULTS = ["WIN", "LOSS"] as const;
+export const CATEGORIES = ["CREATOR", "ORDINARY"] as const;
 export const FORMATS = ["BO1", "BO3", "BO5"] as const;
 export const GAME_RESULTS = ["Victory", "Defeat"] as const;
 
 export type Result = (typeof RESULTS)[number];
+export type Category = (typeof CATEGORIES)[number];
 export type Format = (typeof FORMATS)[number];
 export type GameResult = (typeof GAME_RESULTS)[number];
+
+/** The two collections the public record is split into. */
+export const CATEGORY_LABEL: Record<Category, string> = {
+  CREATOR: "Creators Record",
+  ORDINARY: "Ordinary Record",
+};
+
+/** Krrish's filing rule, stated plainly wherever a category is picked. */
+export const CATEGORY_HINT: Record<Category, string> = {
+  CREATOR: "Opponent is a YouTuber / Instagram creator's team",
+  ORDINARY: "Opponent is a normal in-game guild",
+};
 
 /** Human-readable expansion used on the public detail page. */
 export const FORMAT_LABEL: Record<Format, string> = {
@@ -73,6 +87,9 @@ export const achievementInputSchema = z
         "Channel link must be a full http(s) URL",
       ),
     result: z.enum(RESULTS),
+    // Which of the two collections the record is filed under. Defaults to
+    // Ordinary so any payload that predates the split still validates.
+    category: z.enum(CATEGORIES).default("ORDINARY"),
     finalScore: z
       .string()
       .trim()

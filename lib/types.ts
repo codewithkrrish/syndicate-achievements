@@ -17,6 +17,7 @@ export interface AchievementDTO {
   opponent: string;
   opponentChannelUrl: string | null;
   result: string; // "WIN" | "LOSS"
+  category: string; // "CREATOR" | "ORDINARY"
   finalScore: string;
   format: string; // "BO1" | "BO3" | "BO5"
   date: string; // yyyy-mm-dd
@@ -33,6 +34,7 @@ export interface AchievementFormValues {
   opponent: string;
   opponentChannelUrl: string;
   result: string;
+  category: string;
   finalScore: string;
   format: string;
   date: string; // yyyy-mm-dd
@@ -53,6 +55,7 @@ export const EMPTY_FORM: AchievementFormValues = {
   opponent: "",
   opponentChannelUrl: "",
   result: "WIN",
+  category: "ORDINARY",
   finalScore: "",
   format: "BO3",
   date: new Date().toISOString().slice(0, 10),

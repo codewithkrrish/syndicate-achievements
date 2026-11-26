@@ -4,10 +4,14 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AchievementFormValues } from "@/lib/types";
 import {
+  CATEGORIES,
+  CATEGORY_HINT,
+  CATEGORY_LABEL,
   FORMATS,
   FORMAT_MAX_GAMES,
   GAME_RESULTS,
   RESULTS,
+  type Category,
   type Format,
 } from "@/lib/validation";
 import { CARD_LINE_PATTERN } from "@/lib/site";
@@ -162,6 +166,7 @@ export default function AchievementForm({ initial, achievementId }: Props) {
       opponent: values.opponent,
       opponentChannelUrl: values.opponentChannelUrl,
       result: values.result,
+      category: values.category,
       finalScore: values.finalScore,
       format: values.format,
       date: values.date,
@@ -299,6 +304,26 @@ export default function AchievementForm({ initial, achievementId }: Props) {
               className={inputCls}
             />
           </Field>
+          <div className="sm:col-span-2">
+            <Field label="Record category" error={err("category")}>
+              <select
+                value={values.category}
+                onChange={(e) => set("category", e.target.value)}
+                className={inputCls}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_LABEL[c]} — {CATEGORY_HINT[c].toLowerCase()}
+                  </option>
+                ))}
+              </select>
+              <Hint>
+                File under Creators Record when the opponent team belongs to
+                a YouTuber or an Instagram creator; Ordinary Record when the
+                opponent is a normal in-game guild.
+              </Hint>
+            </Field>
+          </div>
           <div className="sm:col-span-2">
             <Field
               label="Poster thumbnail (optional)"

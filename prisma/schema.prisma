@@ -23,6 +23,7 @@ model Achievement {
   opponent           String
   opponentChannelUrl String?
   result             String // "WIN" | "LOSS" (validated in app code)
+  category           String @default("ORDINARY") // "CREATOR" | "ORDINARY" (validated in app code)
   finalScore         String // e.g. "2 – 1"
   format             String // "BO1" | "BO3" | "BO5" (validated in app code)
   date               DateTime @db.Date

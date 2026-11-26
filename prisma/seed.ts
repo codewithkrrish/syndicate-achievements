@@ -41,6 +41,7 @@ async function main() {
     opponent: "NG Gamer",
     opponentChannelUrl: null as string | null,
     result: "WIN",
+    category: "CREATOR", // NG Gamer is a YouTube creator — a Creators record.
     finalScore: "2 – 1",
     format: "BO3",
     date: new Date("2026-08-08T00:00:00.000Z"),

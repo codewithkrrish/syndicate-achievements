@@ -12,6 +12,7 @@ function toDTO(a: {
   opponent: string;
   opponentChannelUrl: string | null;
   result: string;
+  category: string;
   finalScore: string;
   format: string;
   date: Date;
@@ -34,6 +35,7 @@ function toDTO(a: {
     opponent: a.opponent,
     opponentChannelUrl: a.opponentChannelUrl,
     result: a.result,
+    category: a.category,
     finalScore: a.finalScore,
     format: a.format,
     // @db.Date comes back at UTC midnight; slicing the ISO string keeps the

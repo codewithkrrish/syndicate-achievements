@@ -27,6 +27,7 @@ export default async function EditAchievementPage({
     opponent: achievement.opponent,
     opponentChannelUrl: achievement.opponentChannelUrl ?? "",
     result: achievement.result,
+    category: achievement.category,
     finalScore: achievement.finalScore,
     format: achievement.format,
     date: achievement.date,

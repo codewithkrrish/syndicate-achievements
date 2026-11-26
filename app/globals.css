@@ -101,14 +101,8 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Search highlight + live dropdown                                    */
+/* Live dot (opponent channel bar)                                     */
 /* ------------------------------------------------------------------ */
-
-mark.hl {
-  background: transparent;
-  color: #ff6b66;
-  font-weight: 700;
-}
 
 .live-dot {
   position: relative;
@@ -201,17 +195,6 @@ mark.hl {
   }
 }
 
-@keyframes drop-in {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes lightbox-img-in {
   from {
     opacity: 0;
@@ -249,11 +232,6 @@ mark.hl {
 /* Images fade in as they appear (mount), so a screenshot never pops. */
 .img-in {
   animation: fade-in 0.55s ease-out both;
-}
-
-/* Live search dropdown. */
-.dropdown-in {
-  animation: drop-in 0.18s ease-out both;
 }
 
 /* Screenshot lightbox: backdrop fades, image fades with a slight scale.
@@ -363,8 +341,8 @@ mark.hl {
 /* --- Header: sliding nav underline + logo glow --- */
 .nav-underline {
   position: absolute;
-  left: 0.5rem;
-  right: 0.5rem;
+  left: 0.375rem;
+  right: 0.375rem;
   bottom: 0;
   height: 2px;
   background: #e5322d;
@@ -656,7 +634,7 @@ mark.hl {
 }
 
 /* --- Pulsing dot (the scoreline's "filed" marker; same ping language
-       as the search dropdown's live dot) --- */
+       as the channel bar's live dot) --- */
 .pulse-dot {
   position: relative;
 }
