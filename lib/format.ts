@@ -50,6 +50,18 @@ export function recordLabel(a: {
 }
 
 /**
+ * The shareable standalone URL for a match:
+ * "/creators-record/001" / "/ordinary-record/001".
+ */
+export function detailPath(a: {
+  category: string;
+  matchNumber: number;
+}): string {
+  const record = a.category === "CREATOR" ? "creators-record" : "ordinary-record";
+  return `/${record}/${matchNumberPadded(a.matchNumber)}`;
+}
+
+/**
  * Category-scoped hash slug for a match detail deep link:
  * "#creators-001" / "#ordinary-001". Numbers repeat across records,
  * so the slug has to carry the record too.

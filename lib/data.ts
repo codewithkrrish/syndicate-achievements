@@ -96,6 +96,46 @@ export async function getNextMatchNumbers(): Promise<{
   return next;
 }
 
+/**
+ * One record by its public identity — category + per-record match
+ * number. Powers the shareable detail routes (/creators-record/001).
+ * Follows the site's filing rule: anything not filed as CREATOR reads
+ * as Ordinary.
+ */
+export async function getAchievementByCategoryNumber(
+  category: "CREATOR" | "ORDINARY",
+  matchNumber: number,
+): Promise<AchievementDTO | null> {
+  try {
+    const row = await prisma.achievement.findFirst({
+      where:
+        category === "CREATOR"
+          ? { category: "CREATOR", matchNumber }
+          : { matchNumber, NOT: { category: "CREATOR" } },
+      include: includeGames,
+    });
+    return row ? toDTO(row) : null;
+  } catch (err) {
+    console.error("[data] getAchievementByCategoryNumber failed:", err);
+    return null;
+  }
+}
+
+/** Every filed (category, matchNumber) pair — sitemap + static params. */
+export async function getRecordIndex(): Promise<
+  { category: string; matchNumber: number }[]
+> {
+  try {
+    return await prisma.achievement.findMany({
+      select: { category: true, matchNumber: true },
+      orderBy: [{ category: "asc" }, { matchNumber: "asc" }],
+    });
+  } catch (err) {
+    console.error("[data] getRecordIndex failed:", err);
+    return [];
+  }
+}
+
 export async function getAchievementById(
   id: number,
 ): Promise<AchievementDTO | null> {
