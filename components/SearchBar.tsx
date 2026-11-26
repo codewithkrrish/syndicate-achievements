@@ -70,7 +70,7 @@ export default function SearchBar({
 
   return (
     <div ref={wrapRef} className="relative">
-      <div className="flex items-stretch border border-linestrong bg-raise focus-within:border-brand">
+      <div className="flex items-stretch border border-linestrong bg-raise transition duration-300 focus-within:border-brand focus-within:shadow-[0_0_24px_rgba(229,50,45,0.18)]">
         <span className="flex items-center pl-4 text-ink/50" aria-hidden>
           <svg
             width="18"

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ACHIEVEMENT_TEMPLATE, CASTERS, GUILD, OWNERS } from "@/lib/site";
 import Reveal from "./Reveal";
+import { useLoopPause } from "./useLoopPause";
 
 interface Props {
   onBack: () => void;
@@ -32,6 +33,10 @@ function TemplateText() {
 // personal links.
 export default function AboutView({ onBack }: Props) {
   const [copied, setCopied] = useState(false);
+  // Loop pausing for the founder shimmer (owners row) and the template
+  // header sweep while those blocks are off-screen.
+  const ownersRef = useLoopPause<HTMLDivElement>();
+  const templateRef = useLoopPause<HTMLDivElement>();
 
   const copyTemplate = async () => {
     try {
@@ -94,7 +99,9 @@ export default function AboutView({ onBack }: Props) {
         <Fact label="Community" value={GUILD.community} />
       </dl>
 
-      {/* Owners */}
+      {/* Owners — heading reveals as one block, then the five cards
+          stagger in one by one (same single row on sm+, stacked cards
+          on phones; the Reveal wrappers are the flex items now). */}
       <Reveal className="mt-12">
         <h3 className="font-condensed text-3xl font-bold uppercase">
           Guild Owners
@@ -103,32 +110,38 @@ export default function AboutView({ onBack }: Props) {
           SYNDICATE is run by five owners. They lead the guild, pick the squad
           for guild-vs-guild series, and file every win into this archive.
         </p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-4">
-        {OWNERS.map((o) => (
-          <article key={o.name} className="min-w-0 flex-1 border border-line bg-raise p-4 sm:p-5">
-            <span className="flex h-11 w-11 items-center justify-center bg-brand font-condensed text-xl font-bold text-white">
-              {o.name.charAt(0)}
-            </span>
-            <div className="mt-4 flex flex-col items-start gap-1.5">
-              {o.founder && (
-                <span className="border border-gold/45 bg-gold/10 px-1 py-px text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
-                  Syn Founder
-                </span>
-              )}
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
-                Guild Owner
-              </span>
-            </div>
-            <h4 className="mt-1 break-words font-condensed text-2xl font-bold uppercase leading-tight">
-              {o.name}
-            </h4>
-            <p className="mt-2 text-sm leading-relaxed text-ink/60">{o.note}</p>
-          </article>
-        ))}
-        </div>
       </Reveal>
+      <div
+        ref={ownersRef}
+        className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:gap-4"
+      >
+        {OWNERS.map((o, i) => (
+          <Reveal key={o.name} delay={i * 90} className="min-w-0 flex-1">
+            <article className="group sheen-host relative h-full overflow-hidden border border-line bg-raise p-4 sm:p-5">
+              <span className="flex h-11 w-11 items-center justify-center bg-brand font-condensed text-xl font-bold text-white transition-shadow duration-300 group-hover:shadow-[0_0_18px_rgba(229,50,45,0.5)]">
+                {o.name.charAt(0)}
+              </span>
+              <div className="mt-4 flex flex-col items-start gap-1.5">
+                {o.founder && (
+                  <span className="founder-shine anim-loop border border-gold/45 bg-gold/10 px-1 py-px text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+                    Syn Founder
+                  </span>
+                )}
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
+                  Guild Owner
+                </span>
+              </div>
+              <h4 className="mt-1 break-words font-condensed text-2xl font-bold uppercase leading-tight">
+                {o.name}
+              </h4>
+              <p className="mt-2 text-sm leading-relaxed text-ink/60">{o.note}</p>
+              <span aria-hidden className="card-sheen" />
+            </article>
+          </Reveal>
+        ))}
+      </div>
 
-      {/* Casters */}
+      {/* Casters — heading as one block, cards stagger in. */}
       <Reveal className="mt-12">
         <h3 className="font-condensed text-3xl font-bold uppercase">
           Official Casters
@@ -138,9 +151,11 @@ export default function AboutView({ onBack }: Props) {
           guild — live commentary, match coverage and the guild&rsquo;s series
           as they happen.
         </p>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {CASTERS.map((c) => (
-            <article key={c.name} className="flex flex-col border border-line bg-raise p-5">
+      </Reveal>
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {CASTERS.map((c, i) => (
+          <Reveal key={c.name} delay={i * 90}>
+            <article className="flex h-full flex-col border border-line bg-raise p-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
                 Official Caster · Content Creator
               </p>
@@ -157,11 +172,12 @@ export default function AboutView({ onBack }: Props) {
                 {c.handle} on YouTube →
               </a>
             </article>
-          ))}
-        </div>
-      </Reveal>
+          </Reveal>
+        ))}
+      </div>
 
-      {/* Join */}
+      {/* Join — heading as one block, the two rows slide in from the
+          left, staggered. */}
       <Reveal className="mt-12">
         <h3 className="font-condensed text-3xl font-bold uppercase">
           Join the Guild
@@ -172,45 +188,49 @@ export default function AboutView({ onBack }: Props) {
           first. Follow the guild on Instagram for posters, highlights and
           updates between series.
         </p>
-        <div className="mt-6 space-y-3">
-        <div className="flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4">
-          <p className="min-w-0 flex-1">
-            <span className="block font-condensed text-xl font-semibold uppercase">
-              Official Discord
-            </span>
-            <span className="block truncate font-mono text-xs text-ink/45">
-              discord.gg/VThSqVEUPV
-            </span>
-          </p>
-          <a
-            href={GUILD.discordUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep"
-          >
-            Join the server →
-          </a>
-        </div>
-        <div className="flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4">
-          <p className="min-w-0 flex-1">
-            <span className="block font-condensed text-xl font-semibold uppercase">
-              Official Instagram
-            </span>
-            <span className="block truncate font-mono text-xs text-ink/45">
-              {GUILD.instagramHandle}
-            </span>
-          </p>
-          <a
-            href={GUILD.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-bold uppercase tracking-wider text-ink transition hover:border-brand hover:text-brand"
-          >
-            Follow on Instagram →
-          </a>
-        </div>
-        </div>
       </Reveal>
+      <div className="mt-6 space-y-3">
+        <Reveal direction="left">
+          <div className="flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4">
+            <p className="min-w-0 flex-1">
+              <span className="block font-condensed text-xl font-semibold uppercase">
+                Official Discord
+              </span>
+              <span className="block truncate font-mono text-xs text-ink/45">
+                discord.gg/VThSqVEUPV
+              </span>
+            </p>
+            <a
+              href={GUILD.discordUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep"
+            >
+              Join the server →
+            </a>
+          </div>
+        </Reveal>
+        <Reveal direction="left" delay={110}>
+          <div className="flex flex-wrap items-center gap-4 border border-line bg-card px-5 py-4">
+            <p className="min-w-0 flex-1">
+              <span className="block font-condensed text-xl font-semibold uppercase">
+                Official Instagram
+              </span>
+              <span className="block truncate font-mono text-xs text-ink/45">
+                {GUILD.instagramHandle}
+              </span>
+            </p>
+            <a
+              href={GUILD.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-bold uppercase tracking-wider text-ink transition hover:border-brand hover:text-brand"
+            >
+              Follow on Instagram →
+            </a>
+          </div>
+        </Reveal>
+      </div>
 
       {/* New achievement template */}
       <Reveal className="mt-12">
@@ -224,8 +244,8 @@ export default function AboutView({ onBack }: Props) {
           match&rsquo;s details — the guild&rsquo;s Discord and Instagram links
           are already filled in.
         </p>
-        <div className="mt-6 border border-line bg-raise">
-          <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
+        <div ref={templateRef} className="mt-6 border border-line bg-raise">
+          <div className="template-head flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/55">
               Match announcement · Copy &amp; fill
             </p>

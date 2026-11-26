@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, matchLabel, thumbnailOf } from "@/lib/format";
 
@@ -17,9 +18,38 @@ interface Props {
 export default function RecordCard({ achievement: a, onOpen }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
+  const articleRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  // One observer, two jobs: fire the one-shot entrance effects (sheen
+  // sweep, WIN badge pop) the first time the card arrives, and pause the
+  // badge's pulse loop whenever the card is off-screen.
+  useEffect(() => {
+    const el = articleRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        el.classList.toggle("loop-offscreen", !entry.isIntersecting);
+        if (entry.isIntersecting) setInView(true);
+      },
+      { rootMargin: "80px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <article className="group border border-line bg-raise transition duration-300 hover:-translate-y-[3px] hover:border-linestrong hover:shadow-[0_14px_34px_rgba(0,0,0,0.45)] active:translate-y-0">
+    <article
+      ref={articleRef}
+      className={`group sheen-host border border-line bg-raise transition duration-300 hover:-translate-y-[3px] hover:border-linestrong hover:shadow-[0_14px_34px_rgba(0,0,0,0.45)] active:translate-y-0${
+        inView ? " card-inview" : ""
+      }`}
+    >
       <button
         type="button"
         onClick={() => onOpen(a.id)}
@@ -53,7 +83,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
             )}
             <span
               className={`absolute left-3 top-3 px-2.5 py-1 font-condensed text-sm font-bold uppercase tracking-wider text-white ${
-                isWin ? "bg-brand" : "bg-zinc-600"
+                isWin ? "bg-brand badge-fx anim-loop" : "bg-zinc-600"
               }`}
             >
               {a.result}
@@ -61,6 +91,9 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
             <span className="absolute bottom-3 right-3 bg-black/75 px-2.5 py-1 font-condensed text-lg font-bold leading-none text-white">
               {a.finalScore}
             </span>
+            {/* Light sweep across the thumbnail — plays once when the
+                card arrives and again on hover (see .card-sheen). */}
+            <span aria-hidden className="card-sheen" />
           </div>
 
           {/* Main column */}

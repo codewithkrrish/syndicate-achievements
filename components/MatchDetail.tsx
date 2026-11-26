@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import type { AchievementDTO, GameDTO } from "@/lib/types";
 import { formatDate, matchLabel, matchNumberPadded } from "@/lib/format";
 import { FORMAT_LABEL, type Format } from "@/lib/validation";
+import { useLoopPause } from "./useLoopPause";
 
 interface Props {
   achievement: AchievementDTO;
@@ -18,6 +19,9 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
   const [lightbox, setLightbox] = useState<GameDTO | null>(null);
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef<number | null>(null);
+  // The scoreline's loops (flow border, chip shine, filed-dot pulse)
+  // pause while the block is off-screen.
+  const scorelineRef = useLoopPause<HTMLDivElement>();
   const isWin = a.result === "WIN";
   const formatLabel = FORMAT_LABEL[a.format as Format] ?? "";
 
@@ -76,13 +80,15 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         </h2>
       </div>
 
-      {/* Scoreline */}
+      {/* Scoreline — the perimeter carries the flowing red border
+          (.flow-border); the thick left bar stays as before. */}
       <div
-        className="anim-fade-rise mt-8 border border-line border-l-4 border-l-brand bg-raise shadow-panel"
+        ref={scorelineRef}
+        className="anim-fade-rise flow-border mt-8 border-l-4 border-l-brand bg-raise shadow-panel"
         style={{ "--anim-delay": "120ms" } as React.CSSProperties}
       >
         <p className="border-b border-line px-5 py-3 font-mono text-[11px] uppercase tracking-[0.22em] text-ink/50 sm:px-7">
-          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-brand align-middle" />
+          <span className="pulse-dot mr-2 inline-block h-2 w-2 rounded-full bg-brand align-middle" />
           Match {matchLabel(a.matchNumber)} · Filed from the #achievement channel
         </p>
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-5 py-6 sm:px-7">
@@ -91,7 +97,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               SYNDICATE
             </p>
           </div>
-          <p className="font-condensed text-6xl font-bold leading-none sm:text-7xl">
+          <p className="score-pop font-condensed text-6xl font-bold leading-none sm:text-7xl">
             <span className={isWin ? "text-brand" : "text-ink/50"}>
               {a.finalScore.split("–")[0]?.trim() ?? a.finalScore}
             </span>
@@ -99,7 +105,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             <span>{a.finalScore.split("–")[1]?.trim() ?? ""}</span>
           </p>
           <span
-            className={`px-3 py-1.5 font-condensed text-lg font-bold uppercase tracking-wider text-white ${
+            className={`chip-shine px-3 py-1.5 font-condensed text-lg font-bold uppercase tracking-wider text-white ${
               isWin ? "bg-brand" : "bg-zinc-600"
             }`}
           >
@@ -165,7 +171,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         {a.games.map((g, i) => (
           <article
             key={g.id}
-            className="anim-fade-rise border border-line bg-raise"
+            className="anim-fade-rise lift-hover group border border-line bg-raise"
             style={
               {
                 "--anim-delay": `${220 + Math.min(i * 80, 240)}ms`,
@@ -190,21 +196,60 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
             <button
               type="button"
               onClick={() => setLightbox(g)}
-              className="block w-full"
+              className="sheen-host relative block w-full overflow-hidden"
               aria-label={`View game ${g.gameNumber} screenshot large`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={g.screenshotUrl}
                 alt={`Match ${matchLabel(a.matchNumber)}, game ${g.gameNumber} result screen — ${g.result}, ${g.scoreFor} to ${g.scoreAgainst}`}
-                className="img-in aspect-video w-full object-cover"
+                className="img-in aspect-video w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
                 decoding="async"
               />
+              <span aria-hidden className="card-sheen" />
             </button>
             <p className="px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/45">
               {a.mode} · {a.map} · {g.result} {g.scoreFor} – {g.scoreAgainst}
             </p>
+            {/* Score share bar — the game's own scoreline as a filling
+                bar: red is SYNDICATE's share of the rounds, grey the
+                opponent's. Widths are final in layout; only the fill
+                (scaleX) animates. */}
+            <div className="px-5 pb-4">
+              <div
+                className="score-bar"
+                role="img"
+                aria-label={`Game ${g.gameNumber} score share — SYNDICATE ${g.scoreFor}, ${a.opponent} ${g.scoreAgainst}`}
+                style={
+                  {
+                    "--bar-delay": `${420 + Math.min(i * 80, 240)}ms`,
+                  } as React.CSSProperties
+                }
+              >
+                <span
+                  className="bg-brand"
+                  style={{
+                    width: `${
+                      g.scoreFor + g.scoreAgainst > 0
+                        ? (g.scoreFor / (g.scoreFor + g.scoreAgainst)) * 100
+                        : 50
+                    }%`,
+                  }}
+                />
+                <span
+                  className="score-bar-against bg-linestrong"
+                  style={{
+                    width: `${
+                      g.scoreFor + g.scoreAgainst > 0
+                        ? (g.scoreAgainst / (g.scoreFor + g.scoreAgainst)) *
+                          100
+                        : 50
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
           </article>
         ))}
       </div>
@@ -244,7 +289,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               type="button"
               onClick={close}
               aria-label="Close screenshot viewer"
-              className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand text-2xl font-bold text-white shadow-[0_4px_18px_rgba(0,0,0,0.6)] transition hover:bg-branddeep"
+              className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand text-2xl font-bold text-white shadow-[0_4px_18px_rgba(0,0,0,0.6)] transition duration-300 hover:rotate-45 hover:bg-branddeep"
             >
               ×
             </button>

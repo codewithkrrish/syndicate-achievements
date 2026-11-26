@@ -19,6 +19,9 @@ interface Props {
   /** Entrance stagger, in milliseconds. */
   delay?: number;
   className?: string;
+  /** Travel direction of the entrance: rise from below (default) or
+      slide in from the left (About join rows). */
+  direction?: "up" | "left";
 }
 
 // One-shot entrance wrapper — the scroll-reveal half of the site's motion
@@ -30,7 +33,12 @@ interface Props {
 // cascade), or when an IntersectionObserver sees the element scroll in.
 // If JavaScript never runs, or reduced motion is preferred, nothing is
 // ever hidden.
-export default function Reveal({ children, delay = 0, className = "" }: Props) {
+export default function Reveal({
+  children,
+  delay = 0,
+  className = "",
+  direction = "up",
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useState(false);
   const [shown, setShown] = useState(false);
@@ -78,9 +86,13 @@ export default function Reveal({ children, delay = 0, className = "" }: Props) {
   return (
     <div
       ref={ref}
-      className={`reveal${hidden && !shown ? " reveal-hidden" : ""}${
-        className ? ` ${className}` : ""
-      }`}
+      className={`reveal${
+        hidden && !shown
+          ? direction === "left"
+            ? " reveal-hidden-x"
+            : " reveal-hidden"
+          : ""
+      }${className ? ` ${className}` : ""}`}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}

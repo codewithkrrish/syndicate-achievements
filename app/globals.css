@@ -282,6 +282,11 @@ mark.hl {
   opacity: 0;
   transform: translateY(14px);
 }
+/* Slide-in variant (About join rows): same reveal, horizontal travel. */
+.reveal-hidden-x {
+  opacity: 0;
+  transform: translateX(-18px);
+}
 
 /* Animated underline for plain text links (footer, caster channels). */
 .link-line {
@@ -304,6 +309,444 @@ mark.hl {
   transform: scaleX(1);
 }
 
+/* ------------------------------------------------------------------ */
+/* Animation pack (public site)                                        */
+/* The site-wide motion layer: header scroll progress + sliding nav    */
+/* underlines + logo glow, view settle-in, hero title shine + results  */
+/* ticker + count-up stats, card sheen + WIN badge pop/pulse, detail   */
+/* flow border + score pop + chip shine + per-game score bars, About   */
+/* founder shimmer + template sweep, footer flow line + brand shine,   */
+/* lightbox close rotation (a Tailwind hover class in MatchDetail).    */
+/*                                                                     */
+/* Smoothness contract: loops animate transform / opacity /            */
+/* background-position only — never layout properties — and every      */
+/* loop pauses while its section is off-screen (.loop-offscreen, set   */
+/* by components/useLoopPause.ts) or the tab is hidden (.tab-hidden    */
+/* on <html>, set by PublicSite). There is deliberately NO motion      */
+/* on/off toggle anywhere: motion is always on for everyone. The       */
+/* only opt-out is the visitor's own OS reduced-motion setting,        */
+/* honoured by the block at the bottom of this file.                   */
+/* ------------------------------------------------------------------ */
+
+/* --- Loop pausing (JS toggles the two classes) --- */
+.loop-offscreen .anim-loop,
+.anim-loop.loop-offscreen,
+.tab-hidden .anim-loop,
+.loop-offscreen .flow-border::before,
+.tab-hidden .flow-border::before,
+.loop-offscreen .chip-shine::after,
+.tab-hidden .chip-shine::after,
+.loop-offscreen .template-head::after,
+.tab-hidden .template-head::after,
+.loop-offscreen .footer-flow::after,
+.tab-hidden .footer-flow::after,
+.loop-offscreen .pulse-dot::after,
+.tab-hidden .pulse-dot::after {
+  animation-play-state: paused;
+}
+
+/* --- View change: gentle settle-in (PublicSite wraps each view) --- */
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.view-enter {
+  animation: view-enter 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* --- Header: sliding nav underline + logo glow --- */
+.nav-underline {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0;
+  height: 2px;
+  background: #e5322d;
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.2s ease;
+}
+@media (min-width: 640px) {
+  .nav-underline {
+    left: 1rem;
+    right: 1rem;
+  }
+}
+.nav-btn:hover .nav-underline,
+.nav-btn:focus-visible .nav-underline {
+  transform: scaleX(1);
+}
+.nav-underline-active {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+@keyframes logo-glow-pulse {
+  from {
+    filter: drop-shadow(0 0 3px rgba(229, 50, 45, 0.35));
+  }
+  to {
+    filter: drop-shadow(0 0 8px rgba(229, 50, 45, 0.6));
+  }
+}
+.logo-glow {
+  animation: logo-glow-pulse 3.4s ease-in-out infinite alternate;
+}
+
+/* --- Hero title shine (background-clip text, base colour + one bright
+       band that sweeps across, then rests) --- */
+@keyframes shine-move {
+  0% {
+    background-position: 115% 0;
+  }
+  50%,
+  100% {
+    background-position: -15% 0;
+  }
+}
+.title-shine {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: shine-move 6s ease-in-out infinite;
+}
+.title-shine-light {
+  background-image: linear-gradient(
+    105deg,
+    #f2f1ec 0%,
+    #f2f1ec 42%,
+    #ffffff 50%,
+    #f2f1ec 58%,
+    #f2f1ec 100%
+  );
+}
+.title-shine-red {
+  background-image: linear-gradient(
+    105deg,
+    #e5322d 0%,
+    #e5322d 42%,
+    #ff8f88 50%,
+    #e5322d 58%,
+    #e5322d 100%
+  );
+}
+
+/* --- Results ticker (under the hero; track is two identical copies,
+       translating -50% loops seamlessly) --- */
+.ticker {
+  overflow: hidden;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 40s linear infinite;
+}
+.ticker-copy {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0.55rem 0;
+}
+.ticker-sep {
+  width: 6px;
+  height: 6px;
+  margin: 0 1.4rem;
+  background: #e5322d;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* --- Card sheen: a light sweep across a surface. Two identical
+       keyframe sets under different names so the on-view sweep and a
+       later hover sweep can each (re)start. --- */
+.card-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.13) 48%,
+    rgba(255, 255, 255, 0.03) 54%,
+    transparent 68%
+  );
+  transform: translateX(-130%);
+}
+@keyframes sheen-a {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130%);
+  }
+}
+@keyframes sheen-b {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130%);
+  }
+}
+.card-inview .card-sheen {
+  animation: sheen-a 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both;
+}
+.sheen-host:hover .card-sheen {
+  animation: sheen-b 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* --- WIN badge: pop when its card arrives, then a soft pulse ring --- */
+@keyframes badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 50, 45, 0.4);
+  }
+  55% {
+    box-shadow: 0 0 0 7px rgba(229, 50, 45, 0);
+  }
+}
+.card-inview .badge-fx {
+  animation:
+    badge-pop 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s both,
+    badge-pulse 2.8s ease-in-out 0.8s infinite;
+}
+
+/* --- Match detail: flowing red border on the scoreline block.
+       A 1px gradient ring (mask-composite cut-out) travels around the
+       perimeter; the block's own thick left bar stays underneath. --- */
+.flow-border {
+  position: relative;
+}
+.flow-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(
+    120deg,
+    #26262c,
+    #e5322d,
+    #26262c,
+    #b01e1a,
+    #26262c
+  );
+  background-size: 300% 300%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: border-flow 7s linear infinite;
+  pointer-events: none;
+}
+@keyframes border-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 300% 50%;
+  }
+}
+
+/* --- Match detail: big score pop-in --- */
+@keyframes score-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.score-pop {
+  animation: score-pop 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.28s both;
+}
+
+/* --- Shine pass for chips and the template header bar --- */
+@keyframes shine-pass {
+  0% {
+    transform: translateX(-130%);
+  }
+  45%,
+  100% {
+    transform: translateX(130%);
+  }
+}
+.chip-shine {
+  position: relative;
+  overflow: hidden;
+}
+.chip-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  animation: shine-pass 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.template-head {
+  position: relative;
+  overflow: hidden;
+}
+.template-head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 60%
+  );
+  transform: translateX(-130%);
+  animation: shine-pass 5.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* --- Pulsing dot (the scoreline's "filed" marker; same ping language
+       as the search dropdown's live dot) --- */
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(229, 50, 45, 0.6);
+  animation: live-ping 1.6s ease-out infinite;
+}
+
+/* --- Per-game score bars: final widths are set inline, the fill is a
+       scaleX so layout never moves while they animate --- */
+.score-bar {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+.score-bar > span {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: bar-fill 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--bar-delay, 0ms);
+}
+.score-bar .score-bar-against {
+  animation-delay: calc(var(--bar-delay, 0ms) + 130ms);
+}
+@keyframes bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --- Hover lift on the CSS `translate` property, so it composes with
+       (never fights) the transform entrance animations --- */
+.lift-hover {
+  transition:
+    translate 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.lift-hover:hover {
+  translate: 0 -3px;
+  border-color: #3a3a42;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+/* --- About: golden founder shimmer (transparent band over the badge's
+       own gold tint, so the resting look is unchanged) --- */
+.founder-shine {
+  background-image: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(232, 179, 60, 0.32) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: shine-move 4.6s ease-in-out infinite;
+}
+
+/* --- Footer: a red segment travels the top line --- */
+.footer-flow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 38%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5322d, transparent);
+  transform: translateX(-110%);
+  animation: footer-flow-move 7.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes footer-flow-move {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(290%);
+  }
+}
+
 /* Reduced motion: EVERYTHING above (and the background/live-dot motion
    defined earlier) goes still — animations off, transitions near-instant,
    smooth scroll off, and Reveal content simply shown. The Reveal
@@ -322,5 +765,13 @@ mark.hl {
   .reveal-hidden {
     opacity: 1 !important;
     transform: none !important;
+  }
+  .reveal-hidden-x {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Score bars rest at their final fill, fully visible. */
+  .score-bar > span {
+    transform: scaleX(1) !important;
   }
 }
