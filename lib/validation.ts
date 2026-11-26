@@ -153,7 +153,7 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
 }
 
 // ---------------------------------------------------------------------------
-// Upload validation (used by /api/admin/upload before anything touches Blob).
+// Upload validation (used by /api/admin/upload before anything is stored).
 // ---------------------------------------------------------------------------
 
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // ~8 MB

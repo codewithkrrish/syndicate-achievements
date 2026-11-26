@@ -115,7 +115,7 @@ export default function AchievementForm({
       games: prev.games.filter((_, idx) => idx !== i),
     }));
 
-  // ---- Screenshot upload (Vercel Blob via /api/admin/upload) -------------
+  // ---- Screenshot upload (DB-backed, via /api/admin/upload) --------------
   const handleUpload = async (i: number, file: File | undefined) => {
     if (!file) return;
     setUploadingRow(i);
@@ -410,7 +410,7 @@ export default function AchievementForm({
                     />
                   </div>
                   <p className="mt-2 text-xs text-ink/45">
-                    JPG, PNG or WebP, up to 8 MB. Stored on Vercel Blob.
+                    JPG, PNG or WebP, up to 8 MB. Stored in the site database.
                   </p>
                   <label className="mt-3 block">
                     <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
@@ -661,7 +661,7 @@ export default function AchievementForm({
                       />
                     </div>
                     <p className="mt-2 text-xs text-ink/45">
-                      JPG, PNG or WebP, up to 8 MB. Stored on Vercel Blob.
+                      JPG, PNG or WebP, up to 8 MB. Stored in the site database.
                     </p>
                     <label className="mt-3 block">
                       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/db";
+import { detailPath } from "@/lib/format";
 import {
   achievementInputSchema,
   fieldErrors,
@@ -26,11 +27,59 @@ async function requireAdmin(): Promise<boolean> {
   return !!session?.user;
 }
 
-function refreshPublicSite() {
-  // The public archive is force-dynamic, so this is belt-and-braces: any
-  // statically-cached fragment anywhere is dropped the moment data changes.
+function refreshPublicSite(
+  affected: { category: string; matchNumber: number }[] = [],
+) {
+  // Every public surface that renders record data is ISR-cached for 60s;
+  // a mutation drops them all on demand so the change is visible the
+  // moment it is saved: home (stats, ticker, summaries), both collection
+  // pages, the standalone match pages for every affected record (old AND
+  // new identity when a record moves), and the sitemap.
   revalidatePath("/");
+  revalidatePath("/creators-record");
+  revalidatePath("/ordinary-record");
+  revalidatePath("/sitemap.xml");
   revalidatePath("/admin");
+  for (const a of affected) {
+    revalidatePath(detailPath(a));
+  }
+}
+
+/** "/api/images/<id>" -> "<id>"; any other URL -> null. */
+function storedImageId(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const m = url.match(/^\/api\/images\/([^/?#]+)$/);
+  return m ? m[1] : null;
+}
+
+/**
+ * Delete StoredImage rows whose URLs are no longer referenced by ANY
+ * game screenshot or poster thumbnail. Called after a mutation with the
+ * URLs that mutation may have orphaned (replaced/removed screenshots,
+ * a deleted record's images). Reference counting happens against the
+ * post-mutation database, so an image shared by two records is only
+ * removed when the last reference goes. Failures are logged, never
+ * fatal — a leftover row is harmless, a failed save is not.
+ */
+async function cleanupStoredImages(urls: (string | null | undefined)[]) {
+  const ids = new Map<string, string>(); // id -> url
+  for (const u of urls) {
+    const id = storedImageId(u);
+    if (id && u) ids.set(id, u);
+  }
+  for (const [id, url] of ids) {
+    try {
+      const [games, thumbs] = await Promise.all([
+        prisma.game.count({ where: { screenshotUrl: url } }),
+        prisma.achievement.count({ where: { thumbnailUrl: url } }),
+      ]);
+      if (games === 0 && thumbs === 0) {
+        await prisma.storedImage.delete({ where: { id } });
+      }
+    } catch (err) {
+      console.error("[admin action] StoredImage cleanup failed:", err);
+    }
+  }
 }
 
 function friendlyDbError(err: unknown): string {
@@ -81,7 +130,9 @@ export async function createAchievement(input: unknown): Promise<ActionResult> {
         },
       },
     });
-    refreshPublicSite();
+    refreshPublicSite([
+      { category: created.category, matchNumber: created.matchNumber },
+    ]);
     return { ok: true, id: created.id };
   } catch (err) {
     return { ok: false, formError: friendlyDbError(err) };
@@ -102,6 +153,19 @@ export async function updateAchievement(
     return { ok: false, errors: fieldErrors(parsed.error) };
   }
   const data = parsed.data;
+
+  // The record's current identity + image URLs, captured before the
+  // write: the old standalone page must be revalidated too when the
+  // record moves, and replaced screenshots orphan their StoredImages.
+  const before = await prisma.achievement.findUnique({
+    where: { id },
+    select: {
+      category: true,
+      matchNumber: true,
+      thumbnailUrl: true,
+      games: { select: { screenshotUrl: true } },
+    },
+  });
 
   try {
     // Replace the game set wholesale: simpler and safer than diffing rows,
@@ -135,7 +199,18 @@ export async function updateAchievement(
         },
       }),
     ]);
-    refreshPublicSite();
+    refreshPublicSite([
+      ...(before
+        ? [{ category: before.category, matchNumber: before.matchNumber }]
+        : []),
+      { category: data.category, matchNumber: data.matchNumber },
+    ]);
+    if (before) {
+      await cleanupStoredImages([
+        before.thumbnailUrl,
+        ...before.games.map((g) => g.screenshotUrl),
+      ]);
+    }
     return { ok: true, id };
   } catch (err) {
     return { ok: false, formError: friendlyDbError(err) };
@@ -147,10 +222,32 @@ export async function deleteAchievement(id: number): Promise<ActionResult> {
   if (!Number.isInteger(id) || id <= 0) {
     return { ok: false, formError: "Invalid achievement id." };
   }
+  // Capture the record's identity + image URLs first: after the delete
+  // they are gone, and both the revalidation and the StoredImage cleanup
+  // need them.
+  const before = await prisma.achievement.findUnique({
+    where: { id },
+    select: {
+      category: true,
+      matchNumber: true,
+      thumbnailUrl: true,
+      games: { select: { screenshotUrl: true } },
+    },
+  });
   try {
     // Games cascade-delete with the achievement (schema onDelete: Cascade).
     await prisma.achievement.delete({ where: { id } });
-    refreshPublicSite();
+    refreshPublicSite(
+      before
+        ? [{ category: before.category, matchNumber: before.matchNumber }]
+        : [],
+    );
+    if (before) {
+      await cleanupStoredImages([
+        before.thumbnailUrl,
+        ...before.games.map((g) => g.screenshotUrl),
+      ]);
+    }
     return { ok: true, id };
   } catch (err) {
     return { ok: false, formError: friendlyDbError(err) };

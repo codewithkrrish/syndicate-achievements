@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
+import { detailPath, formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
-// Dashboard achievement list with live search (opponent / match number)
-// and a result filter. Filtering is client-side: the whole archive is
-// small, and the admin gets instant feedback while typing.
+// Dashboard achievement list with live search (opponent / match number),
+// a record (category) filter and a result filter. Filtering is
+// client-side: the whole archive is small, and the admin gets instant
+// feedback while typing.
 export default function AchievementList({
   achievements,
 }: {
@@ -15,10 +16,17 @@ export default function AchievementList({
 }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<"ALL" | "WIN" | "LOSS">("ALL");
+  const [category, setCategory] = useState<"ALL" | "CREATOR" | "ORDINARY">(
+    "ALL",
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return achievements.filter((a) => {
+      // Same filing rule as the public site: CREATOR is exact, anything
+      // else reads as Ordinary.
+      if (category === "CREATOR" && a.category !== "CREATOR") return false;
+      if (category === "ORDINARY" && a.category === "CREATOR") return false;
       if (result !== "ALL" && a.result !== result) return false;
       if (!q) return true;
       return (
@@ -27,7 +35,7 @@ export default function AchievementList({
         recordLabel(a).toLowerCase().includes(q)
       );
     });
-  }, [achievements, query, result]);
+  }, [achievements, query, result, category]);
 
   return (
     <div>
@@ -81,6 +89,29 @@ export default function AchievementList({
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="mt-3 flex" role="group" aria-label="Filter by record">
+        {(
+          [
+            ["ALL", "All records"],
+            ["CREATOR", "Creators Record"],
+            ["ORDINARY", "Ordinary Record"],
+          ] as const
+        ).map(([c, label]) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setCategory(c)}
+            className={`min-h-11 border px-4 font-condensed text-sm font-bold uppercase tracking-wider transition ${
+              category === c
+                ? "border-brand bg-brand text-white"
+                : "border-linestrong bg-raise text-ink/60 hover:text-ink"
+            } ${c !== "ALL" ? "-ml-px" : ""}`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <p aria-live="polite" className="mt-3 font-mono text-xs text-ink/45">
@@ -156,6 +187,14 @@ export default function AchievementList({
                   </span>
                 </span>
                 <div className="flex shrink-0 gap-2">
+                  <a
+                    href={detailPath(a)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-10 items-center border border-linestrong px-4 font-condensed text-sm font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
+                  >
+                    View live
+                  </a>
                   <Link
                     href={`/admin/achievements/${a.id}/edit`}
                     className="inline-flex min-h-10 items-center border border-linestrong px-4 font-condensed text-sm font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
