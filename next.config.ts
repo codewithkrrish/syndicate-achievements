@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
 // wrapper and then the edge config did not unstick it. With no access
 // to Netlify's build logs from here, the whole SDK was removed so
 // production could ship; the Sentry project itself still exists
-// (org "codeiwithkrrish", project "syndicate-achievements") and the
-// full integration is preserved in git history at 6b8bf456. To retry:
+// (project "syndicate-achievements") and the full integration is
+// preserved in git history at 6b8bf456. To retry:
 // re-add it while watching a Netlify build log, one piece at a time.
 export default nextConfig;

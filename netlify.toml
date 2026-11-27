@@ -1,0 +1,16 @@
+# Netlify configuration for the syndicate-achievements-app site.
+#
+# This file deliberately contains ONLY the build-environment section
+# below. The build command, publish directory and all other deploy
+# settings stay configured in the Netlify UI and must keep governing
+# the site — do not add them here.
+#
+# SECRETS_SCAN_OMIT_KEYS: ADMIN_USERNAME is the admin's public login
+# identifier, not a secret. Its value also appears as a substring
+# inside longer unrelated words, which made Netlify's secrets scanner
+# fail production builds as a false positive. Omitting just this one
+# key clears that; ADMIN_PASSWORD_HASH and every other key remain
+# fully scanned and protected.
+
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "ADMIN_USERNAME"
