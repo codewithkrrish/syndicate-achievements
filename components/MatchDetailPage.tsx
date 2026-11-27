@@ -27,8 +27,12 @@ export async function matchMetadata(
   const n = parseMatchNumber(numberParam);
   const a = n ? await getAchievementByCategoryNumber(category, n) : null;
   if (!a) {
-    // The page 404s; metadata stays generic so nothing wrong is shared.
-    return { title: "Match not on record" };
+    // 404 from HERE, not only from the page body: metadata resolves
+    // before the response stream starts, so the status stays a real
+    // 404. The same check in the page component below renders the
+    // not-found UI but — with the root loading.tsx streaming a shell
+    // first — its status degrades to a soft-404 200.
+    notFound();
   }
   const label = recordLabel(a);
   const title = `SYNDICATE vs ${a.opponent} — ${label}`;
