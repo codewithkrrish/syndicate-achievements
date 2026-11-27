@@ -16,12 +16,10 @@ const securityHeaders = [
     // Content-Security-Policy. script-src/style-src keep 'unsafe-inline'
     // because Next injects inline runtime/style tags (there is no nonce
     // setup); fonts load from Google Fonts; img-src allows https: because
-    // admins may paste external screenshot URLs into a record. connect-src
-    // additionally allows the Sentry ingest host so browser error reports
-    // can leave the page.
+    // admins may paste external screenshot URLs into a record.
     key: "Content-Security-Policy",
     value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://o4512136254586880.ingest.de.sentry.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
   },
 ];
 
@@ -67,13 +65,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Deliberately NO withSentryConfig wrapper: Sentry's build plugin made
-// Netlify's build fail (every deploy from the Sentry commit onward never
-// shipped there, while Vercel and local builds passed). The Sentry SDK
-// itself needs no build plugin — instrumentation.ts + the three config
-// files initialise it at runtime, and error events report with full
-// server-side context. The plugin only added source-map upload (already
-// disabled — no SENTRY_AUTH_TOKEN is kept for this project) and component
-// name annotations, neither of which this site needs. Do not re-add the
-// wrapper without first proving a Netlify build passes with it.
+// No Sentry in the build right now — deliberately. The Sentry
+// integration (commit 6b8bf456) coincided exactly with Netlify builds
+// stopping: production stayed pinned at the pre-Sentry commit while
+// Vercel and local builds passed, and removing the build-plugin
+// wrapper and then the edge config did not unstick it. With no access
+// to Netlify's build logs from here, the whole SDK was removed so
+// production could ship; the Sentry project itself still exists
+// (org "codeiwithkrrish", project "syndicate-achievements") and the
+// full integration is preserved in git history at 6b8bf456. To retry:
+// re-add it while watching a Netlify build log, one piece at a time.
 export default nextConfig;

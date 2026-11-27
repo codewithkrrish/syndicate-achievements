@@ -1,11 +1,10 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 // Last-resort error boundary (replaces the root layout when it fails), so it
 // cannot rely on the site's CSS — inline styles in the same near-black/red
-// language. Its other job is reporting the failure to Sentry.
+// language.
 export default function GlobalError({
   error,
   reset,
@@ -14,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    console.error(error);
   }, [error]);
 
   return (
