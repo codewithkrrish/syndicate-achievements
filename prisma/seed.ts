@@ -7,9 +7,13 @@ import { PrismaClient } from "@prisma/client";
 // (matched by its unique (category, matchNumber) pair) and rebuilds
 // its games, so `npm run db:seed` is always safe.
 //
-// The opponent's YouTube channel link is intentionally null: it has not
-// been verified yet, and the site only shows the channel bar when a real
-// link is on file. Add it later from the admin panel — never invent one.
+// The opponent's YouTube channel link below is the verified one Krrish
+// supplied on 25 Nov 2026 — the same value the live record carries, so
+// re-running this seed can never strip the channel bar off the page.
+// Never invent a channel link; only file one that has been verified.
+// The poster thumbnail stays null on purpose: poster thumbnails were
+// rejected for this site, and the card falls back to the decider game's
+// screenshot.
 //
 // Screenshots are the real result screens from the guild's archive. They
 // are inserted into the database itself (StoredImage, under fixed seed
@@ -40,7 +44,7 @@ async function main() {
   const data = {
     matchNumber: 1,
     opponent: "NG Gamer",
-    opponentChannelUrl: null as string | null,
+    opponentChannelUrl: "https://www.youtube.com/@NG_GAMER_080",
     result: "WIN",
     category: "CREATOR", // NG Gamer is a YouTube creator — a Creators record.
     finalScore: "2 – 1",
@@ -49,7 +53,7 @@ async function main() {
     mode: "Clash Squad",
     map: "Bermuda",
     cardLine: "Went the distance — SYNDICATE beat NG Gamer.",
-    thumbnailUrl: "/seed/match-002-poster.jpg",
+    thumbnailUrl: null as string | null,
   };
 
   const games = [

@@ -20,6 +20,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
   const [lightbox, setLightbox] = useState<GameDTO | null>(null);
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef<number | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
   // The scoreline's loops (flow border, chip shine, filed-dot pulse)
   // pause while the block is off-screen.
   const scorelineRef = useLoopPause<HTMLDivElement>();
@@ -43,6 +44,9 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
 
   useEffect(() => {
     if (!lightbox) return;
+    // Keyboard and screen-reader users land inside the dialog, on its
+    // close control — not stranded behind the overlay.
+    closeBtnRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -107,10 +111,10 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           </div>
           <p className="score-pop shrink-0 font-condensed text-[2.1rem] font-bold leading-none sm:text-7xl">
             <span className={isWin ? "text-brand" : "text-ink/50"}>
-              {a.finalScore.split("–")[0]?.trim() ?? a.finalScore}
+              {a.finalScore.split(/[–—-]/)[0]?.trim() ?? a.finalScore}
             </span>
             <span className="mx-1 text-ink/30">–</span>
-            <span>{a.finalScore.split("–")[1]?.trim() ?? ""}</span>
+            <span>{a.finalScore.split(/[–—-]/)[1]?.trim() ?? ""}</span>
           </p>
           <span
             className={`chip-shine shrink-0 px-2 py-1 font-condensed text-xs font-bold uppercase tracking-wider text-white sm:px-3 sm:py-1.5 sm:text-lg ${
@@ -295,6 +299,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               {a.mode}, {a.map}
             </p>
             <button
+              ref={closeBtnRef}
               type="button"
               onClick={close}
               aria-label="Close screenshot viewer"

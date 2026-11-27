@@ -96,6 +96,11 @@ export default function SearchBar({
           aria-label="Search achievements by guild or creator name"
           aria-expanded={open}
           aria-controls="live-results"
+          aria-activedescendant={
+            open && matches[active]
+              ? `search-result-${matches[active].id}`
+              : undefined
+          }
           className="h-12 min-w-0 flex-1 bg-transparent px-3 text-base text-ink outline-none placeholder:text-ink/35"
           onChange={(e) => onQueryChange(e.target.value)}
           onFocus={() => setFocused(true)}
@@ -163,6 +168,7 @@ export default function SearchBar({
               return (
                 <button
                   key={a.id}
+                  id={`search-result-${a.id}`}
                   role="option"
                   aria-selected={i === active}
                   onMouseEnter={() => setActive(i)}

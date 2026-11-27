@@ -305,7 +305,7 @@ body {
 /* background-position only — never layout properties — and every      */
 /* loop pauses while its section is off-screen (.loop-offscreen, set   */
 /* by components/useLoopPause.ts) or the tab is hidden (.tab-hidden    */
-/* on <html>, set by PublicSite). There is deliberately NO motion      */
+/* on <html>, set by SiteHeader). There is deliberately NO motion      */
 /* on/off toggle anywhere: motion is always on for everyone. The       */
 /* only opt-out is the visitor's own OS reduced-motion setting,        */
 /* honoured by the block at the bottom of this file.                   */
