@@ -2,14 +2,18 @@
 
 import { useEffect, useRef } from "react";
 
-// Rising-ember particle layer, mounted ONLY inside the home hero —
-// the canvas is absolutely positioned within the hero section (which
-// clips it with overflow-hidden), so embers can never drift over the
-// rest of the page or appear at the screen edges further down.
+// Rising-ember particle layer, mounted site-wide inside the shared
+// backdrop (SiteBackdrop): the canvas fills the backdrop's fixed,
+// overflow-hidden wrapper, so it is clipped to exactly the viewport
+// box and can never widen the page or paint past the screen edges.
+// (It was briefly confined to the home hero after stray dots were
+// seen at the page sides on phones — those turned out to come from
+// an unclipped footer decoration, fixed separately; with that gone,
+// the flakes are back everywhere Krrish wanted them.)
 // Deliberately cheap: capped device-pixel-ratio, a small particle
-// budget (smaller on phones), drawing paused when the tab is hidden
-// or the hero is off-screen, and fully disabled for
-// prefers-reduced-motion.
+// budget (smaller on phones, where it should read as subtle ambience
+// rather than noise), drawing paused when the tab is hidden, and
+// fully disabled for prefers-reduced-motion.
 export default function EmberCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -23,7 +27,7 @@ export default function EmberCanvas() {
 
     let raf = 0;
     let running = true; // tab visible
-    let inView = true; // hero on screen
+    let inView = true; // canvas on screen
     let w = 0;
     let h = 0;
 
@@ -39,8 +43,9 @@ export default function EmberCanvas() {
     let embers: Ember[] = [];
 
     const resize = () => {
-      // Size to the hero container, never the window: the canvas is
-      // confined to the hero box, so its particles stay inside it.
+      // Size to the backdrop wrapper — the fixed, viewport-sized box
+      // that clips this canvas — so particles are only ever drawn
+      // inside the visible screen area.
       const host = canvas.parentElement;
       if (!host) return;
       const rect = host.getBoundingClientRect();
@@ -50,7 +55,7 @@ export default function EmberCanvas() {
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = w < 640 ? 26 : 44;
+      const count = w < 640 ? 20 : 40;
       embers = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -87,8 +92,8 @@ export default function EmberCanvas() {
     resize();
     raf = requestAnimationFrame(tick);
 
-    // Re-measure when the hero box itself changes size, and only draw
-    // while the hero is actually on screen.
+    // Re-measure when the backdrop box itself changes size (viewport
+    // resizes / rotations), and only draw while on screen.
     const host = canvas.parentElement;
     const ro =
       host && typeof ResizeObserver !== "undefined"
