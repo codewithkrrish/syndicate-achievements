@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { ACHIEVEMENT_TEMPLATE, CASTERS, GUILD, OWNERS } from "@/lib/site";
+import { CASTERS, GUILD, OWNERS } from "@/lib/site";
 import Reveal from "./Reveal";
 import { useLoopPause } from "./useLoopPause";
 
@@ -9,57 +8,13 @@ interface Props {
   onBack: () => void;
 }
 
-/** Renders the template text with [BRACKETED] placeholders in gold. */
-function TemplateText() {
-  const parts = ACHIEVEMENT_TEMPLATE.split(/(\[[^\]]+\])/g);
-  return (
-    <pre className="thin-scroll overflow-x-auto whitespace-pre-wrap break-words p-4 font-mono text-xs leading-relaxed text-ink/85 sm:p-5 sm:text-[13px]">
-      {parts.map((p, i) =>
-        p.startsWith("[") ? (
-          <span key={i} className="ph">
-            {p}
-          </span>
-        ) : (
-          <span key={i}>{p}</span>
-        ),
-      )}
-    </pre>
-  );
-}
-
 // About Us: guild facts, the five owners, the three official casters with
-// their channels, the official Discord/Instagram, and the copy-paste
-// template for announcing new achievements. All guild links — never any
-// personal links.
+// their channels, and the official Discord/Instagram. All guild links —
+// never any personal links.
 export default function AboutView({ onBack }: Props) {
-  const [copied, setCopied] = useState(false);
-  // Loop pausing for the founder shimmer (owners row) and the template
-  // header sweep while those blocks are off-screen.
+  // Loop pausing for the founder shimmer (owners row) while that block
+  // is off-screen.
   const ownersRef = useLoopPause<HTMLDivElement>();
-  const templateRef = useLoopPause<HTMLDivElement>();
-
-  const copyTemplate = async () => {
-    try {
-      await navigator.clipboard.writeText(ACHIEVEMENT_TEMPLATE);
-    } catch {
-      // Clipboard API can be unavailable (permissions, old browser): fall
-      // back to a temporary textarea + execCommand.
-      const ta = document.createElement("textarea");
-      ta.value = ACHIEVEMENT_TEMPLATE;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand("copy");
-      } catch {
-        /* the text stays visible to copy by hand */
-      }
-      document.body.removeChild(ta);
-    }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2200);
-  };
 
   return (
     <section aria-label="About the guild">
@@ -231,37 +186,6 @@ export default function AboutView({ onBack }: Props) {
           </div>
         </Reveal>
       </div>
-
-      {/* New achievement template */}
-      <Reveal className="mt-9 sm:mt-12">
-        <h3 className="font-condensed text-2xl font-bold uppercase sm:text-3xl">
-          New Achievement Template
-        </h3>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60 sm:text-[15px]">
-          The standard post for every new win. Copy it, paste it wherever the
-          win gets announced, and replace each{" "}
-          <span className="ph">[BRACKETED]</span> placeholder with the new
-          match&rsquo;s details — the guild&rsquo;s Discord and Instagram links
-          are already filled in.
-        </p>
-        <div ref={templateRef} className="mt-6 border border-line bg-raise">
-          <div className="template-head flex flex-wrap items-center gap-3 border-b border-line px-4 py-2.5 sm:px-5 sm:py-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/55">
-              Match announcement · Copy &amp; fill
-            </p>
-            <button
-              type="button"
-              onClick={copyTemplate}
-              className={`ml-auto inline-flex min-h-10 items-center px-4 font-condensed text-sm font-bold uppercase tracking-wider text-white transition ${
-                copied ? "bg-emerald-700" : "bg-brand hover:bg-branddeep"
-              }`}
-            >
-              {copied ? "Copied — ready to paste" : "Copy template"}
-            </button>
-          </div>
-          <TemplateText />
-        </div>
-      </Reveal>
     </section>
   );
 }
