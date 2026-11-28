@@ -16,7 +16,11 @@ import { useLoopPause } from "./useLoopPause";
 type View = { name: "list" } | { name: "about" };
 
 function hashFor(view: View): string {
-  return view.name === "about" ? "#about" : "#record";
+  // The list is the page itself, so its URL stays clean — no hash at
+  // all. Only About carries a hash, because it names a view rather
+  // than the page. (An older build tagged the list "#record"; that
+  // hash is stripped on load below and never written again.)
+  return view.name === "about" ? "#about" : "";
 }
 
 function viewFromHash(): View {
@@ -81,6 +85,11 @@ export default function PublicSite({
       router.replace(detailPath(m));
       return;
     }
+    // The old "#record" tag on the plain list cleans itself up, so a
+    // bookmarked or shared link ends on the bare main URL.
+    if (window.location.hash === "#record") {
+      history.replaceState(null, "", window.location.pathname);
+    }
     setView(viewFromHash());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -108,7 +117,9 @@ export default function PublicSite({
       setView(next);
       const h = hashFor(next);
       if (window.location.hash !== h) {
-        history.pushState(null, "", h);
+        // An empty hash means the bare page URL — push the pathname
+        // itself so no "#" is left hanging on the address.
+        history.pushState(null, "", h === "" ? window.location.pathname : h);
       }
       mainRef.current?.scrollIntoView({ block: "start" });
     },
