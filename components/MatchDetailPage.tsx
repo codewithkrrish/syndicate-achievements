@@ -5,6 +5,7 @@ import {
   getAchievements,
 } from "@/lib/data";
 import { detailPath, formatDate, recordLabel } from "@/lib/format";
+import { OG_IMAGE_ORIGIN } from "@/lib/site";
 import StandaloneDetail from "./StandaloneDetail";
 
 // Shared server logic for the two shareable match routes
@@ -48,11 +49,21 @@ export async function matchMetadata(
       title: `${title} · SYNDICATE Achievements`,
       description,
       url: path,
+      // Absolute image URL on the serving origin — see OG_IMAGE_ORIGIN.
+      images: [
+        {
+          url: `${OG_IMAGE_ORIGIN}${path}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} · SYNDICATE Achievements`,
       description,
+      images: [`${OG_IMAGE_ORIGIN}${path}/twitter-image`],
     },
   };
 }

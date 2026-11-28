@@ -18,7 +18,7 @@ export default function StandaloneAbout({
   const router = useRouter();
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="relative min-h-dvh touch-pan-y">
       <SiteBackdrop />
       <SiteHeader active="about" />
       <main className="relative z-10 scroll-mt-20">

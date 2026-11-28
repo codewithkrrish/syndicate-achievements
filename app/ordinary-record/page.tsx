@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAchievements } from "@/lib/data";
+import { OG_IMAGE_ORIGIN } from "@/lib/site";
 import CategoryPage from "@/components/CategoryPage";
 
 const ORDINARY_DESCRIPTION =
@@ -17,11 +18,21 @@ export const metadata: Metadata = {
     title: "Ordinary Record · SYNDICATE Achievements",
     description: ORDINARY_DESCRIPTION,
     url: "/ordinary-record",
+    // Absolute image URL on the serving origin — see OG_IMAGE_ORIGIN.
+    images: [
+      {
+        url: `${OG_IMAGE_ORIGIN}/ordinary-record/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Ordinary Record · SYNDICATE Achievements",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ordinary Record · SYNDICATE Achievements",
     description: ORDINARY_DESCRIPTION,
+    images: [`${OG_IMAGE_ORIGIN}/ordinary-record/twitter-image`],
   },
 };
 

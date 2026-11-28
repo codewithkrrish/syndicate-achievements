@@ -69,7 +69,7 @@ export default function CategoryPage({
   };
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="relative min-h-dvh touch-pan-y">
       <SiteBackdrop />
       <SiteHeader active={meta.navKey as "creators" | "ordinary"} />
 

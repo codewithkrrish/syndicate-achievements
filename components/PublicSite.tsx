@@ -138,7 +138,13 @@ export default function PublicSite({
   }, [achievements]);
 
   return (
-    <div className="relative min-h-dvh">
+    // touch-pan-y (on every public page root): the archive is laid out
+    // to fit the phone exactly, so the browser gets no say in moving it
+    // sideways — vertical scrolling only, no pinch-zoom or side-pan of
+    // the page itself. The screenshot lightbox is portalled to <body>,
+    // outside this root, and keeps its pinch-zoom on purpose: a result
+    // screen is exactly what a visitor wants to zoom into.
+    <div className="relative min-h-dvh touch-pan-y">
       <SiteBackdrop />
       <SiteHeader active={null} />
 
@@ -353,9 +359,15 @@ function CategorySummary({
                 />
               )}
               <span className="min-w-0 flex-1">
+                {/* The record label must stay free to wrap: set in
+                    mono with this tracking it measures wider than the
+                    column beside the thumbnail on phones, and as a
+                    nowrap span it spilled sideways over the score
+                    badge. "Latest ·" alone keeps its nowrap — it is
+                    short and always fits on the first line. */}
                 <span className="block font-mono text-[10px] uppercase tracking-[0.22em] text-brand sm:text-[11px]">
                   <span className="whitespace-nowrap">Latest ·</span>{" "}
-                  <span className="whitespace-nowrap">{recordLabel(latest)}</span>
+                  {recordLabel(latest)}
                 </span>
                 <span className="mt-1 block truncate font-condensed text-xl font-bold uppercase leading-tight sm:text-2xl">
                   SYNDICATE <span className="text-ink/40">vs</span>{" "}

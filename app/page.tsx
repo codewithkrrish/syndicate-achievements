@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAchievements } from "@/lib/data";
+import { OG_IMAGE_ORIGIN } from "@/lib/site";
 import PublicSite from "@/components/PublicSite";
 
 // The home page's own share card: its title and description, with the
@@ -15,11 +16,21 @@ export const metadata: Metadata = {
     title: "SYNDICATE Achievements — Official Match Archive",
     description: HOME_DESCRIPTION,
     url: "/",
+    // Absolute image URL on the serving origin — see OG_IMAGE_ORIGIN.
+    images: [
+      {
+        url: `${OG_IMAGE_ORIGIN}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "SYNDICATE Achievements — Official Match Archive",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "SYNDICATE Achievements — Official Match Archive",
     description: HOME_DESCRIPTION,
+    images: [`${OG_IMAGE_ORIGIN}/twitter-image`],
   },
 };
 

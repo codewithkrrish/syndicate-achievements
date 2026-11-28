@@ -25,7 +25,7 @@ export default function StandaloneDetail({
   const base = category === "CREATOR" ? "/creators-record" : "/ordinary-record";
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="relative min-h-dvh touch-pan-y">
       <SiteBackdrop />
       <SiteHeader active={category === "CREATOR" ? "creators" : "ordinary"} />
       <main className="relative z-10 scroll-mt-20">

@@ -19,6 +19,7 @@ interface Props {
 export default function MatchDetail({ achievement: a, onBack }: Props) {
   const [lightbox, setLightbox] = useState<GameDTO | null>(null);
   const [closing, setClosing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   // The lightbox opens the original full-size screenshot directly (no
   // optimizer in between), so it heals the same way SafeImage does: a
   // failed load retries with a fresh query instead of staying broken
@@ -27,6 +28,7 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
   const lbTimer = useRef<number | null>(null);
   useEffect(() => {
     setLbAttempt(0);
+    setDownloading(false);
   }, [lightbox]);
   useEffect(
     () => () => {
@@ -56,6 +58,41 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
       setClosing(false);
     }, 180);
   }, []);
+
+  // Download the open screenshot at its original size. Fetch it as a
+  // blob so the saved file gets a clean name even when the image is
+  // served cross-origin (a bare <a download> drops the filename
+  // off-origin); if the fetch fails for any reason, fall back to
+  // opening the original in a new tab. The click is stopped here so
+  // it never reaches the backdrop's close handler.
+  const download = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (!lightbox || downloading) return;
+    const url = lightbox.screenshotUrl;
+    const slug = a.opponent
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const filename = `syndicate-vs-${slug || "opponent"}-game-${lightbox.gameNumber}.jpg`;
+    setDownloading(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Download failed: HTTP ${res.status}`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(url, "_blank", "noopener");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     if (!lightbox) return;
@@ -332,21 +369,56 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           }`}
           onClick={close}
         >
-          <div className="relative z-10 flex items-center justify-between gap-4 pb-4">
-            <p className="min-w-0 font-mono text-xs uppercase tracking-[0.2em] text-ink/70">
-              {recordLabel(a)} · Game {lightbox.gameNumber} —{" "}
-              {lightbox.result}, {lightbox.scoreFor} – {lightbox.scoreAgainst} ·{" "}
-              {a.mode}, {a.map}
+          {/* Top bar — a solid strip, not bare text over the blurred
+              backdrop: the game details sit on bg-card with a line
+              border so they stay readable over any screenshot, and
+              the actions (download, then the red close) sit on the
+              right. The backdrop behind it keeps its blur — only
+              this bar is solid. */}
+          <div className="relative z-10 mb-4 flex items-center justify-between gap-3 border border-line bg-card px-3 py-2.5 shadow-[0_4px_18px_rgba(0,0,0,0.6)] sm:gap-4 sm:px-4 sm:py-3">
+            <p className="min-w-0 font-mono text-[11px] uppercase leading-relaxed tracking-[0.18em] text-ink/85 sm:text-xs">
+              <span className="text-white">
+                {recordLabel(a)} · Game {lightbox.gameNumber}
+              </span>{" "}
+              — {lightbox.result}, {lightbox.scoreFor} – {lightbox.scoreAgainst}{" "}
+              · {a.mode}, {a.map}
             </p>
-            <button
-              ref={closeBtnRef}
-              type="button"
-              onClick={close}
-              aria-label="Close screenshot viewer"
-              className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand text-2xl font-bold text-white shadow-[0_4px_18px_rgba(0,0,0,0.6)] transition duration-300 hover:rotate-45 hover:bg-branddeep"
-            >
-              ×
-            </button>
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={download}
+                disabled={downloading}
+                aria-label={`Download game ${lightbox.gameNumber} screenshot`}
+                className="flex h-12 w-12 shrink-0 items-center justify-center gap-2 border border-linestrong bg-white/5 font-condensed text-sm font-bold uppercase tracking-wider text-ink transition hover:border-brand hover:text-brand disabled:cursor-wait disabled:opacity-60 sm:w-auto sm:px-4"
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5 shrink-0"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span className="hidden sm:inline">
+                  {downloading ? "Saving…" : "Download"}
+                </span>
+              </button>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                onClick={close}
+                aria-label="Close screenshot viewer"
+                className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand text-2xl font-bold text-white shadow-[0_4px_18px_rgba(0,0,0,0.6)] transition duration-300 hover:rotate-45 hover:bg-branddeep"
+              >
+                ×
+              </button>
+            </div>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

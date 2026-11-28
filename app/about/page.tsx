@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAchievements } from "@/lib/data";
+import { OG_IMAGE_ORIGIN } from "@/lib/site";
 import StandaloneAbout from "@/components/StandaloneAbout";
 
 // About the guild, on its own page: /about. It used to be an in-page
@@ -19,11 +20,21 @@ export const metadata: Metadata = {
     title: "About Us · SYNDICATE Achievements",
     description: ABOUT_DESCRIPTION,
     url: "/about",
+    // Absolute image URL on the serving origin — see OG_IMAGE_ORIGIN.
+    images: [
+      {
+        url: `${OG_IMAGE_ORIGIN}/about/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "About Us · SYNDICATE Achievements",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "About Us · SYNDICATE Achievements",
     description: ABOUT_DESCRIPTION,
+    images: [`${OG_IMAGE_ORIGIN}/about/twitter-image`],
   },
 };
 

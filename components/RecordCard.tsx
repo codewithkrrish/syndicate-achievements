@@ -136,9 +136,8 @@ export default function RecordCard({ achievement: a }: Props) {
               {a.cardLine}
             </p>
 
-            <dl className="mt-3.5 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-line pt-3 sm:mt-4 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-4 sm:pt-[0.85rem] lg:grid-cols-5">
+            <dl className="mt-3.5 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-line pt-3 sm:mt-4 sm:gap-x-6 sm:gap-y-4 sm:pt-[0.85rem] lg:grid-cols-4">
               <Meta label="Guild / Creator" value={a.opponent} />
-              <Meta label="Date" value={formatDate(a.date)} />
               <Meta label="Mode" value={a.mode} />
               <Meta label="Map" value={a.map} />
               <Meta label="Format" value={a.format} />

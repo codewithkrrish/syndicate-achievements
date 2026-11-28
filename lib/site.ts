@@ -2,6 +2,16 @@
 // database; the guild's identity (owners, casters, official links) changes
 // rarely and is maintained here, in one place.
 
+// Origin that serves the generated share-preview images (the
+// opengraph-image / twitter-image routes). metadataBase points at the main
+// domain (syndicate.run.place, Netlify), whose build currently lags the
+// Vercel deployment — until the Netlify catch-up on 10 Dec 2026 those image
+// routes 404 there, which left shared links with no preview image at all.
+// The renders are identical on both hosts, so page metadata names this
+// origin for the preview images only; canonical URLs stay on the main
+// domain.
+export const OG_IMAGE_ORIGIN = "https://syndicate-achievements.vercel.app";
+
 export const GUILD = {
   name: "SYNDICATE",
   tag: "SYN",
