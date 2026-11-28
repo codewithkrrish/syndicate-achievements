@@ -369,13 +369,27 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           }`}
           onClick={close}
         >
-          {/* Top bar — a solid strip, not bare text over the blurred
-              backdrop: the game details sit on bg-card with a line
-              border so they stay readable over any screenshot, and
-              the actions (download, then the red close) sit on the
-              right. The backdrop behind it keeps its blur — only
-              this bar is solid. */}
-          <div className="relative z-10 mb-4 flex items-center justify-between gap-3 border border-line bg-card px-3 py-2.5 shadow-[0_4px_18px_rgba(0,0,0,0.6)] sm:gap-4 sm:px-4 sm:py-3">
+          {/* The viewer is one framed unit (Krrish's call, 28 Nov):
+              the details bar is stuck to the top edge of the
+              screenshot itself instead of floating above it, and a
+              thin border in the site's own line grey runs around the
+              whole frame. The frame hugs the picture — the img keeps
+              its natural aspect inside max bounds below, and the bar
+              takes the frame's width via w-0 + min-w-full, so a long
+              caption wraps inside the bar instead of widening the
+              frame past the picture. The unit is centred in the
+              leftover space; the backdrop keeps its blur. */}
+          <div className="flex min-h-0 flex-1 items-center justify-center">
+            <div
+              className={`flex max-h-full w-fit max-w-full flex-col border border-line bg-card shadow-[0_8px_40px_rgba(0,0,0,0.65)] ${
+                closing ? "lightbox-img-out" : "lightbox-img-in"
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Details bar — solid bg-card so the game details stay
+                  readable over any screenshot; divider line under it,
+                  actions (download, then the red close) on the right. */}
+              <div className="flex w-0 min-w-full items-center justify-between gap-3 border-b border-line px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
             <p className="min-w-0 font-mono text-[11px] uppercase leading-relaxed tracking-[0.18em] text-ink/85 sm:text-xs">
               <span className="text-white">
                 {recordLabel(a)} · Game {lightbox.gameNumber}
@@ -420,28 +434,28 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
               </button>
             </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={
-              lbAttempt === 0
-                ? lightbox.screenshotUrl
-                : `${lightbox.screenshotUrl}${lightbox.screenshotUrl.includes("?") ? "&" : "?"}synretry=${lbAttempt}`
-            }
-            alt={`Game ${lightbox.gameNumber} result screen, large`}
-            className={`min-h-0 flex-1 object-contain ${
-              closing ? "lightbox-img-out" : "lightbox-img-in"
-            }`}
-            decoding="async"
-            onClick={(e) => e.stopPropagation()}
-            onError={() => {
-              if (lbAttempt < 2) {
-                lbTimer.current = window.setTimeout(
-                  () => setLbAttempt((a) => a + 1),
-                  500 * (lbAttempt + 1),
-                );
-              }
-            }}
-          />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={
+                  lbAttempt === 0
+                    ? lightbox.screenshotUrl
+                    : `${lightbox.screenshotUrl}${lightbox.screenshotUrl.includes("?") ? "&" : "?"}synretry=${lbAttempt}`
+                }
+                alt={`Game ${lightbox.gameNumber} result screen, large`}
+                className="block h-auto max-h-[calc(100dvh-9rem)] w-auto max-w-full sm:max-h-[calc(100dvh-11rem)]"
+                decoding="async"
+                onClick={(e) => e.stopPropagation()}
+                onError={() => {
+                  if (lbAttempt < 2) {
+                    lbTimer.current = window.setTimeout(
+                      () => setLbAttempt((a) => a + 1),
+                      500 * (lbAttempt + 1),
+                    );
+                  }
+                }}
+              />
+            </div>
+          </div>
           </div>,
           document.body,
         )}
