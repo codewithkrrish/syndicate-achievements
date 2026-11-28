@@ -105,9 +105,19 @@ export async function createAchievement(input: unknown): Promise<ActionResult> {
   const data = parsed.data;
 
   try {
+    // The match number is assigned here, never taken from the form:
+    // the next free number in the record being filed under. Creators
+    // Record and Ordinary Record each number their own matches from
+    // #001, so the sequence is computed per category.
+    const latest = await prisma.achievement.findFirst({
+      where: { category: data.category },
+      orderBy: { matchNumber: "desc" },
+      select: { matchNumber: true },
+    });
+    const nextNumber = (latest?.matchNumber ?? 0) + 1;
     const created = await prisma.achievement.create({
       data: {
-        matchNumber: data.matchNumber,
+        matchNumber: nextNumber,
         opponent: data.opponent,
         opponentChannelUrl: data.opponentChannelUrl,
         opponentDiscordUrl: data.opponentDiscordUrl,

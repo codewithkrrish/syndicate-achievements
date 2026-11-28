@@ -51,9 +51,6 @@ export default function AchievementForm({
 }: Props) {
   const router = useRouter();
   const [values, setValues] = useState<AchievementFormValues>(initial);
-  // Create mode: the match number tracks the category's next free
-  // number until the admin types one of their own.
-  const [numberAuto, setNumberAuto] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -252,27 +249,82 @@ export default function AchievementForm({
         note="Who the series was against, when it was played, and the game setup."
       >
         <div className="grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Field label="Record category" error={err("category")}>
+              <select
+                value={values.category}
+                onChange={(e) => {
+                  const category = e.target.value;
+                  // Create mode: the match number is automatic — it
+                  // follows the picker to the selected record's next
+                  // free number. Each record numbers separately.
+                  if (!isEdit && nextByCategory?.[category]) {
+                    setValues((prev) => ({
+                      ...prev,
+                      category,
+                      matchNumber: nextByCategory[category],
+                    }));
+                  } else {
+                    set("category", category);
+                  }
+                }}
+                className={inputCls}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_LABEL[c]} — {CATEGORY_HINT[c].toLowerCase()}
+                  </option>
+                ))}
+              </select>
+              <Hint>
+                File under Creators Record when the opponent team belongs to
+                a YouTuber or an Instagram creator; Ordinary Record when the
+                opponent is a normal in-game guild.
+              </Hint>
+            </Field>
+          </div>
           <Field label="Match number" error={err("matchNumber")}>
-            <input
-              type="number"
-              min={1}
-              inputMode="numeric"
-              value={values.matchNumber}
-              onChange={(e) => {
-                setNumberAuto(false);
-                set(
-                  "matchNumber",
-                  e.target.value === "" ? "" : Number(e.target.value),
-                );
-              }}
-              placeholder={String(nextByCategory?.[values.category] ?? 1)}
-              className={inputCls}
-            />
-            <Hint>
-              Each record numbers its own matches from #001 — this is the
-              next free number in the selected record. Must be unique
-              within the record.
-            </Hint>
+            {isEdit ? (
+              <>
+                <input
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={values.matchNumber}
+                  onChange={(e) =>
+                    set(
+                      "matchNumber",
+                      e.target.value === "" ? "" : Number(e.target.value),
+                    )
+                  }
+                  className={inputCls}
+                />
+                <Hint>
+                  This match's number in its record. Each record numbers
+                  its own matches from #001, and the number must stay
+                  unique within the record.
+                </Hint>
+              </>
+            ) : (
+              <>
+                <div
+                  className={`${inputCls} flex items-center justify-between`}
+                  aria-label={`Match number ${values.matchNumber}, set automatically`}
+                >
+                  <span>
+                    #{String(values.matchNumber || "").padStart(3, "0")}
+                  </span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/40">
+                    Auto
+                  </span>
+                </div>
+                <Hint>
+                  Set automatically — the next free number in the selected
+                  record. Creators Record and Ordinary Record number their
+                  matches separately.
+                </Hint>
+              </>
+            )}
           </Field>
           <Field label="Date" error={err("date")}>
             <input
@@ -362,39 +414,6 @@ export default function AchievementForm({
               ))}
             </select>
           </Field>
-          <div className="sm:col-span-2">
-            <Field label="Record category" error={err("category")}>
-              <select
-                value={values.category}
-                onChange={(e) => {
-                  const category = e.target.value;
-                  // Create mode: an untouched number field follows the
-                  // picker to the newly selected record's next number.
-                  if (!isEdit && numberAuto && nextByCategory?.[category]) {
-                    setValues((prev) => ({
-                      ...prev,
-                      category,
-                      matchNumber: nextByCategory[category],
-                    }));
-                  } else {
-                    set("category", category);
-                  }
-                }}
-                className={inputCls}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {CATEGORY_LABEL[c]} — {CATEGORY_HINT[c].toLowerCase()}
-                  </option>
-                ))}
-              </select>
-              <Hint>
-                File under Creators Record when the opponent team belongs to
-                a YouTuber or an Instagram creator; Ordinary Record when the
-                opponent is a normal in-game guild.
-              </Hint>
-            </Field>
-          </div>
           <div className="sm:col-span-2">
             <Field
               label="Poster thumbnail (optional)"
