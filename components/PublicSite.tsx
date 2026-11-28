@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,25 +9,8 @@ import { detailPath, formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
 import SiteFooter, { SiteBackdrop } from "./SiteFooter";
 import Reveal from "./Reveal";
-import AboutView from "./AboutView";
 import CountUp from "./CountUp";
 import { useLoopPause } from "./useLoopPause";
-
-type View = { name: "list" } | { name: "about" };
-
-function hashFor(view: View): string {
-  // The list is the page itself, so its URL stays clean — no hash at
-  // all. Only About carries a hash, because it names a view rather
-  // than the page. (An older build tagged the list "#record"; that
-  // hash is stripped on load below and never written again.)
-  return view.name === "about" ? "#about" : "";
-}
-
-function viewFromHash(): View {
-  return window.location.hash === "#about"
-    ? { name: "about" }
-    : { name: "list" };
-}
 
 // Old in-page match links (#creators-001 / #ordinary-001, and the
 // legacy #match-002 from before per-record numbering) no longer open
@@ -58,73 +41,47 @@ function matchFromHash(achievements: AchievementDTO[]): AchievementDTO | null {
 }
 
 // The home page: hero, match-level stats, results ticker, and a summary
-// entry for each of the two record collections. The full collections
-// live on their own pages (/creators-record, /ordinary-record), and
-// every match lives on its own page too — opening a match navigates to
-// /creators-record/001 (etc.), never an in-page view, so the address
-// bar always shows the match's real URL. About remains an in-page
-// view (#about); old match hashes (#creators-001) redirect to the
-// match's page.
+// entry for each of the two record collections. Everything it points
+// at is a page of its own — the collections at /creators-record and
+// /ordinary-record, each match at /creators-record/001 (etc.), About
+// at /about — so no URL on the site carries a "#" hash. The only hash
+// handling left here is rescue duty for old links: a match hash
+// (#creators-001) redirects to the match's page, "#about" redirects
+// to /about, and the long-gone "#record" tag is stripped on sight.
 export default function PublicSite({
   achievements,
 }: {
   achievements: AchievementDTO[];
 }) {
   const router = useRouter();
-  const [view, setView] = useState<View>({ name: "list" });
-  const mainRef = useRef<HTMLElement>(null);
   // Continuous loops pause while their section is off-screen.
   const heroRef = useLoopPause<HTMLElement>();
   const tickerRef = useLoopPause<HTMLDivElement>();
 
-  // Initial view from the URL hash (deep links). A hash naming a match
-  // goes to that match's own page instead of opening it here.
+  // Rescue old hash links, on first load and on Back/Forward alike.
   useEffect(() => {
-    const m = matchFromHash(achievements);
-    if (m) {
-      router.replace(detailPath(m));
-      return;
-    }
-    // The old "#record" tag on the plain list cleans itself up, so a
-    // bookmarked or shared link ends on the bare main URL.
-    if (window.location.hash === "#record") {
-      history.replaceState(null, "", window.location.pathname);
-    }
-    setView(viewFromHash());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Back/Forward support.
-  useEffect(() => {
-    const onPop = () => {
+    const rescue = () => {
       const m = matchFromHash(achievements);
       if (m) {
         router.replace(detailPath(m));
         return;
       }
-      setView(viewFromHash());
+      if (window.location.hash === "#about") {
+        router.replace("/about");
+        return;
+      }
+      if (window.location.hash === "#record") {
+        history.replaceState(null, "", window.location.pathname);
+      }
     };
-    window.addEventListener("popstate", onPop);
-    window.addEventListener("hashchange", onPop);
+    rescue();
+    window.addEventListener("popstate", rescue);
+    window.addEventListener("hashchange", rescue);
     return () => {
-      window.removeEventListener("popstate", onPop);
-      window.removeEventListener("hashchange", onPop);
+      window.removeEventListener("popstate", rescue);
+      window.removeEventListener("hashchange", rescue);
     };
   }, [achievements, router]);
-
-  const navigate = useCallback(
-    (next: View) => {
-      setView(next);
-      const h = hashFor(next);
-      if (window.location.hash !== h) {
-        // An empty hash means the bare page URL — push the pathname
-        // itself so no "#" is left hanging on the address.
-        history.pushState(null, "", h === "" ? window.location.pathname : h);
-      }
-      mainRef.current?.scrollIntoView({ block: "start" });
-    },
-    [],
-  );
 
   // Opening a match goes to the match's own page — its URL is the
   // shareable one, with its own preview.
@@ -135,8 +92,6 @@ export default function PublicSite({
     },
     [achievements, router],
   );
-  const goList = useCallback(() => navigate({ name: "list" }), [navigate]);
-  const goAbout = useCallback(() => navigate({ name: "about" }), [navigate]);
 
   // Anything not filed as CREATOR reads as Ordinary, so a record can
   // never fall out of both collections.
@@ -185,15 +140,10 @@ export default function PublicSite({
   return (
     <div className="relative min-h-dvh">
       <SiteBackdrop />
-      <SiteHeader
-        active={view.name === "about" ? "about" : null}
-        onAbout={goAbout}
-        onHome={goList}
-      />
+      <SiteHeader active={null} />
 
-      <main ref={mainRef} className="relative z-10 scroll-mt-20">
-        {view.name === "list" && (
-          <div key="list" className="view-enter">
+      <main className="relative z-10 scroll-mt-20">
+          <div className="view-enter">
             {/* Hero */}
             <section
               ref={heroRef}
@@ -241,19 +191,18 @@ export default function PublicSite({
                   className="anim-fade-rise mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row"
                   style={{ "--anim-delay": "210ms" } as React.CSSProperties}
                 >
-                  <a
+                  <Link
                     href="/creators-record"
                     className="inline-flex min-h-11 items-center justify-center bg-brand px-5 font-condensed text-base font-bold uppercase tracking-wider text-white transition hover:bg-branddeep sm:min-h-12 sm:px-7 sm:text-lg"
                   >
                     Browse the record
-                  </a>
-                  <button
-                    type="button"
-                    onClick={goAbout}
+                  </Link>
+                  <Link
+                    href="/about"
                     className="inline-flex min-h-11 items-center justify-center border border-linestrong bg-black/30 px-5 font-condensed text-base font-bold uppercase tracking-wider text-ink backdrop-blur-sm transition hover:border-brand hover:text-brand sm:min-h-12 sm:px-7 sm:text-lg"
                   >
                     About the guild
-                  </button>
+                  </Link>
                 </div>
                 {achievements.length > 0 && (
                   <div
@@ -331,19 +280,9 @@ export default function PublicSite({
               className="pb-16 sm:pb-20"
             />
           </div>
-        )}
-
-        {view.name === "about" && (
-          <div
-            key="about"
-            className="view-enter mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8"
-          >
-            <AboutView onBack={goList} />
-          </div>
-        )}
       </main>
 
-      <SiteFooter achievements={achievements} onAbout={goAbout} />
+      <SiteFooter achievements={achievements} />
     </div>
   );
 }

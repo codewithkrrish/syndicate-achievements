@@ -31,9 +31,9 @@ export default function AboutView({ onBack }: Props) {
         style={{ "--anim-delay": "60ms" } as React.CSSProperties}
       >
         <span className="font-mono text-xs text-brand sm:text-sm">03</span>
-        <h2 className="font-condensed text-[1.7rem] font-bold uppercase leading-none sm:text-5xl">
+        <h1 className="font-condensed text-[1.7rem] font-bold uppercase leading-none sm:text-5xl">
           About Us
-        </h2>
+        </h1>
       </div>
       <p
         className="anim-fade-rise mt-3 max-w-2xl text-[15px] leading-relaxed text-ink/65 sm:mt-4 sm:text-base"

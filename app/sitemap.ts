@@ -2,11 +2,10 @@ import type { MetadataRoute } from "next";
 import { getRecordIndex } from "@/lib/data";
 import { detailPath } from "@/lib/format";
 
-// Public routes: home, one page per record collection, and one
-// shareable page per filed match (/creators-record/001 style). About
-// is an in-page view on the home page, not a route, so it gets no
-// entry of its own. Failure-tolerant: if the database is unreachable
-// the sitemap still lists the three collection routes.
+// Public routes: home, one page per record collection, the About
+// page (/about), and one shareable page per filed match
+// (/creators-record/001 style). Failure-tolerant: if the database is
+// unreachable the sitemap still lists the collection routes.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   const base: MetadataRoute.Sitemap = [
@@ -27,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified,
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: "https://syndicate.run.place/about",
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
   ];
 

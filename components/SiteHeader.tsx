@@ -5,19 +5,15 @@ import Link from "next/link";
 
 export type NavKey = "creators" | "ordinary" | "about";
 
-// The site header, shared by the home page and the two record pages.
-// Owns the scroll effects (depth shadow + top progress line) and the
-// hidden-tab loop pause, since it is mounted on every public page.
-// Nav is real links to the record pages; About is an in-page view on
-// the home page (onAbout) and a link back to it from anywhere else.
+// The site header, shared by every public page. Owns the scroll
+// effects (depth shadow + top progress line) and the hidden-tab loop
+// pause, since it is mounted on every public page. Nav is real links
+// throughout — home, the two record pages, and About at /about — so
+// no URL on the site carries a "#" hash.
 export default function SiteHeader({
   active,
-  onAbout,
-  onHome,
 }: {
   active: NavKey | null;
-  onAbout?: () => void;
-  onHome?: () => void;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -113,20 +109,9 @@ export default function SiteHeader({
         />
       </div>
       <div className="mx-auto flex max-w-6xl flex-col px-3 sm:flex-row sm:items-stretch sm:gap-2 sm:px-6">
-        {onHome ? (
-          <button
-            type="button"
-            onClick={onHome}
-            className={brandCls}
-            aria-label="SYNDICATE Achievements — home"
-          >
-            {brandInner}
-          </button>
-        ) : (
-          <Link href="/" className={brandCls} aria-label="SYNDICATE Achievements — home">
-            {brandInner}
-          </Link>
-        )}
+        <Link href="/" className={brandCls} aria-label="SYNDICATE Achievements — home">
+          {brandInner}
+        </Link>
         {/* The two record collections + About. On phones the three
             longer labels get their own row under the brand — one line
             each, nothing squeezed; from sm up it is a single row. */}
@@ -140,15 +125,9 @@ export default function SiteHeader({
           <NavItem href="/ordinary-record" active={active === "ordinary"}>
             Ordinary Record
           </NavItem>
-          {onAbout ? (
-            <NavItem onClick={onAbout} active={active === "about"}>
-              About Us
-            </NavItem>
-          ) : (
-            <NavItem href="/#about" active={active === "about"}>
-              About Us
-            </NavItem>
-          )}
+          <NavItem href="/about" active={active === "about"}>
+            About Us
+          </NavItem>
         </nav>
       </div>
     </header>

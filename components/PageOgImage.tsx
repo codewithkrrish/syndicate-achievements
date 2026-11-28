@@ -11,6 +11,7 @@ import { ogSize } from "@/components/MatchOgImage";
 export const homeAlt = "SYNDICATE Achievements — the official match archive";
 export const creatorsAlt = "Creators Record — SYNDICATE Achievements";
 export const ordinaryAlt = "Ordinary Record — SYNDICATE Achievements";
+export const aboutAlt = "About SYNDICATE — the guild behind the record";
 
 const BG = "#0b0b0d";
 const INK = "#f2f1ec";
@@ -178,6 +179,47 @@ export async function renderHomeOgImage(): Promise<ImageResponse> {
           </div>
         )}
         <Footer left="Every match on record — scores and screenshots for every game" />
+      </Frame>
+    ),
+    ogSize,
+  );
+}
+
+/** About: the guild behind the record — owners, casters, community. */
+export async function renderAboutOgImage(): Promise<ImageResponse> {
+  return new ImageResponse(
+    (
+      <Frame>
+        <Eyebrow text="SYNDICATE ACHIEVEMENTS" />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              fontSize: 104,
+              fontWeight: 700,
+              color: INK,
+              lineHeight: 1,
+              display: "flex",
+            }}
+          >
+            ABOUT
+          </div>
+          <div
+            style={{
+              fontSize: 104,
+              fontWeight: 700,
+              color: BRAND,
+              lineHeight: 1,
+              marginTop: 6,
+              display: "flex",
+            }}
+          >
+            SYNDICATE
+          </div>
+          <div style={{ fontSize: 27, color: MUTED, marginTop: 24, display: "flex" }}>
+            The guild, its owners and its official casters
+          </div>
+        </div>
+        <Footer left="The Free Fire guild behind the record" />
       </Frame>
     ),
     ogSize,

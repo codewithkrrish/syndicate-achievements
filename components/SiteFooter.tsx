@@ -28,14 +28,12 @@ export function SiteBackdrop() {
 }
 
 /** The site footer — guild links only, never personal links. About is
- *  an in-page view on the home page (onAbout) and a link back to it
- *  from the record pages. */
+ *  its own page (/about), linked from every footer like any other
+ *  page on the site. */
 export default function SiteFooter({
   achievements,
-  onAbout,
 }: {
   achievements: AchievementDTO[];
-  onAbout?: () => void;
 }) {
   const footerRef = useLoopPause<HTMLElement>();
   const latest = achievements[0];
@@ -85,15 +83,9 @@ export default function SiteFooter({
           >
             Discord
           </a>
-          {onAbout ? (
-            <button type="button" onClick={onAbout} className={linkCls}>
-              About Us
-            </button>
-          ) : (
-            <Link href="/#about" className={linkCls}>
-              About Us
-            </Link>
-          )}
+          <Link href="/about" className={linkCls}>
+            About Us
+          </Link>
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
