@@ -222,6 +222,30 @@ body {
   }
 }
 
+/* Loading screen (components/LoadingScreen.tsx): the guild mark breathes
+   with a soft red glow while the archive loads behind the screen. */
+@keyframes loader-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(229, 50, 45, 0));
+  }
+  50% {
+    transform: scale(1.045);
+    filter: drop-shadow(0 0 22px rgba(229, 50, 45, 0.45));
+  }
+}
+
+.loader-pulse {
+  animation: loader-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-pulse {
+    animation: none;
+  }
+}
+
 /* Page-open entrance (hero, header, detail blocks). Stagger by setting
    style={{ "--anim-delay": "80ms" }} on successive elements. */
 .anim-fade-rise {

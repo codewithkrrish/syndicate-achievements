@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import LoadingScreen from "@/components/LoadingScreen";
 
 // Phone browser chrome matches the site's near-black background instead of
 // flashing white while the page loads.
@@ -62,8 +63,16 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
+        {/* Without JavaScript the loading screen can never lift, so it
+            must not render at all. */}
+        <noscript>
+          <style>{`#syn-loader{display:none!important}`}</style>
+        </noscript>
       </head>
-      <body className="bg-bg font-sans text-ink antialiased">{children}</body>
+      <body className="bg-bg font-sans text-ink antialiased">
+        <LoadingScreen />
+        {children}
+      </body>
     </html>
   );
 }
