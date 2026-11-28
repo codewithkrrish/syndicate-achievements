@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AchievementFormValues } from "@/lib/types";
 import {
@@ -16,7 +16,11 @@ import {
   type Category,
   type Format,
 } from "@/lib/validation";
-import { CARD_LINE_PATTERN } from "@/lib/site";
+import {
+  CARD_LINE_PATTERN,
+  CARD_LINE_PRESETS,
+  cardLineFromPattern,
+} from "@/lib/site";
 import {
   createAchievement,
   updateAchievement,
@@ -51,6 +55,31 @@ export default function AchievementForm({
 }: Props) {
   const router = useRouter();
   const [values, setValues] = useState<AchievementFormValues>(initial);
+  // Card line style: a ready-made pattern whose [OPPONENT] fills in
+  // with the opponent's name, or CUSTOM for a hand-written line. An
+  // existing record opens on its matching preset when it has one.
+  const [cardLinePreset, setCardLinePreset] = useState<string>(() => {
+    const opp = initial.opponent.trim();
+    if (initial.cardLine && opp) {
+      const hit = CARD_LINE_PRESETS.find(
+        (p) => cardLineFromPattern(p.pattern, opp) === initial.cardLine,
+      );
+      return hit ? hit.pattern : "CUSTOM";
+    }
+    return initial.cardLine ? "CUSTOM" : CARD_LINE_PATTERN;
+  });
+
+  // While a preset is selected, the line follows the opponent field —
+  // type the name and the line names them, exactly as it will be saved.
+  useEffect(() => {
+    if (cardLinePreset === "CUSTOM") return;
+    const opp = values.opponent.trim();
+    const next = opp ? cardLineFromPattern(cardLinePreset, opp) : "";
+    setValues((prev) =>
+      prev.cardLine === next ? prev : { ...prev, cardLine: next },
+    );
+  }, [values.opponent, cardLinePreset]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -220,10 +249,6 @@ export default function AchievementForm({
       setSubmitting(false);
     }
   };
-
-  const cardLinePreview = values.opponent.trim()
-    ? `Went the distance — SYNDICATE beat ${values.opponent.trim()}.`
-    : CARD_LINE_PATTERN;
 
   return (
     <form onSubmit={onSubmit} noValidate>
@@ -552,33 +577,61 @@ export default function AchievementForm({
       {/* ------------------------- Card line ------------------------- */}
       <Section
         title="Card line"
-        note="The one short line under the title on the record card. Keep it to the fixed pattern so every card in the record reads the same way."
+        note="The one short line under the title on the record card. Pick a ready-made style — the opponent's name fills in on its own — or choose Custom and write your own."
       >
-        <Field label="Card line" error={err("cardLine")}>
-          <input
-            type="text"
-            value={values.cardLine}
-            onChange={(e) => set("cardLine", e.target.value)}
-            placeholder={cardLinePreview}
-            maxLength={160}
-            className={inputCls}
-          />
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <p className="font-mono text-xs text-ink/45">
-              Pattern: <span className="text-ink/70">{CARD_LINE_PATTERN}</span>
-            </p>
-            <button
-              type="button"
-              onClick={() => set("cardLine", cardLinePreview)}
-              className="font-condensed text-sm font-semibold uppercase tracking-wider text-brand hover:text-[#ff6b66]"
+        <div className="space-y-5">
+          <Field label="Card line style">
+            <select
+              value={cardLinePreset}
+              onChange={(e) => setCardLinePreset(e.target.value)}
+              className={inputCls}
+              aria-label="Card line style"
             >
-              Use pattern with this opponent
-            </button>
-            <span className="ml-auto font-mono text-xs text-ink/40">
-              {values.cardLine.length}/160
-            </span>
-          </div>
-        </Field>
+              {[...new Set(CARD_LINE_PRESETS.map((p) => p.group))].map(
+                (group) => (
+                  <optgroup key={group} label={group}>
+                    {CARD_LINE_PRESETS.filter((p) => p.group === group).map(
+                      (p) => (
+                        <option key={p.pattern} value={p.pattern}>
+                          {cardLineFromPattern(
+                            p.pattern,
+                            values.opponent.trim() || "[OPPONENT]",
+                          )}
+                        </option>
+                      ),
+                    )}
+                  </optgroup>
+                ),
+              )}
+              <option value="CUSTOM">Custom — write your own</option>
+            </select>
+          </Field>
+          <Field label="Card line" error={err("cardLine")}>
+            <input
+              type="text"
+              value={values.cardLine}
+              onChange={(e) => {
+                // Typing in the box switches the style to Custom, so a
+                // hand-tweaked line is never overwritten by a preset.
+                setCardLinePreset("CUSTOM");
+                set("cardLine", e.target.value);
+              }}
+              placeholder="One short line for the card"
+              maxLength={160}
+              className={inputCls}
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="font-mono text-xs text-ink/45">
+                {cardLinePreset === "CUSTOM"
+                  ? "Custom line — saved exactly as written."
+                  : "The name fills in from the opponent field above."}
+              </p>
+              <span className="ml-auto font-mono text-xs text-ink/40">
+                {values.cardLine.length}/160
+              </span>
+            </div>
+          </Field>
+        </div>
       </Section>
 
       {/* ------------------------- Games & screenshots ------------------------- */}
