@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Image from "./SafeImage";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
+import { detailPath, formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
 interface Props {
   achievement: AchievementDTO;
-  onOpen: (id: number) => void;
 }
 
 // One entry in The Record, laid out exactly like the original static
 // design: thumbnail (decider screenshot) with result badge and score
 // overlay, then the main column (kicker, title, card line, meta grid),
 // then a right side column with the final-score block on top and the
-// View match action at the bottom. The whole card is a button — one tap
-// target, no nested interactive elements.
-export default function RecordCard({ achievement: a, onOpen }: Props) {
+// View match action at the bottom. The whole card is one link to the
+// match's own page (/creators-record/001, /ordinary-record/001, ...) —
+// one tap target, no nested interactive elements, and the address bar
+// always shows the match's real, shareable URL.
+export default function RecordCard({ achievement: a }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
   const articleRef = useRef<HTMLElement | null>(null);
@@ -51,9 +53,8 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
         inView ? " card-inview" : ""
       }`}
     >
-      <button
-        type="button"
-        onClick={() => onOpen(a.id)}
+      <Link
+        href={detailPath(a)}
         className="block w-full text-left"
         aria-label={`View ${recordLabel(a)} against ${a.opponent}`}
       >
@@ -142,7 +143,7 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
             </span>
           </div>
         </div>
-      </button>
+      </Link>
     </article>
   );
 }

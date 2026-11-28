@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AchievementDTO } from "@/lib/types";
+import { detailPath } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
 import SiteFooter, { SiteBackdrop } from "./SiteFooter";
 import SearchBar from "./SearchBar";
 import RecordCard from "./RecordCard";
 import Reveal from "./Reveal";
-import MatchDetail from "./MatchDetail";
 
 const META = {
   CREATOR: {
@@ -27,9 +28,11 @@ const META = {
 
 // One collection's own page: its heading and filing rule, a search box
 // that filters ONLY this collection's records, and the full card list.
-// A card opens the match detail right here; Back returns to this page's
-// list. The header's global search is gone for good — search lives on
-// the collection pages, scoped to the collection.
+// Every card (and every search result) goes to the match's own page —
+// /creators-record/001, /ordinary-record/001 — so the address bar
+// always shows the match's real, shareable URL. The header's global
+// search is gone for good — search lives on the collection pages,
+// scoped to the collection.
 export default function CategoryPage({
   category,
   achievements,
@@ -38,10 +41,9 @@ export default function CategoryPage({
   achievements: AchievementDTO[];
 }) {
   const meta = META[category];
+  const router = useRouter();
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
-  const mainRef = useRef<HTMLElement>(null);
 
   // Anything not filed as CREATOR reads as Ordinary — the same rule the
   // home summaries use, so a record can never fall out of both pages.
@@ -59,36 +61,19 @@ export default function CategoryPage({
     return records.filter((a) => a.opponent.toLowerCase().includes(q));
   }, [records, query]);
 
-  const selected =
-    selectedId !== null
-      ? (records.find((a) => a.id === selectedId) ?? null)
-      : null;
-
-  // Opening or leaving a match starts from the top of the page body
-  // (but the page's first mount leaves the scroll position alone).
-  const firstRender = useRef(true);
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    mainRef.current?.scrollIntoView({ block: "start" });
-  }, [selectedId]);
+  // A search pick goes straight to that match's own page, exactly like
+  // tapping its card.
+  const openMatch = (id: number) => {
+    const a = records.find((x) => x.id === id);
+    if (a) router.push(detailPath(a));
+  };
 
   return (
     <div className="relative min-h-dvh">
       <SiteBackdrop />
       <SiteHeader active={meta.navKey as "creators" | "ordinary"} />
 
-      <main ref={mainRef} className="relative z-10 scroll-mt-20">
-        {selected ? (
-          <div className="view-enter mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8">
-            <MatchDetail
-              achievement={selected}
-              onBack={() => setSelectedId(null)}
-            />
-          </div>
-        ) : (
+      <main className="relative z-10 scroll-mt-20">
           <div className="view-enter mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-10">
             <div className="anim-fade-rise flex items-baseline gap-3 sm:gap-4">
               <span className="font-mono text-xs text-brand sm:text-sm">
@@ -112,7 +97,7 @@ export default function CategoryPage({
                 achievements={records}
                 query={query}
                 onQueryChange={setQuery}
-                onOpen={setSelectedId}
+                onOpen={openMatch}
                 inputRef={searchRef}
               />
             </Reveal>
@@ -154,13 +139,12 @@ export default function CategoryPage({
               ) : (
                 filtered.map((a, i) => (
                   <Reveal key={a.id} delay={Math.min(i * 75, 300)}>
-                    <RecordCard achievement={a} onOpen={setSelectedId} />
+                    <RecordCard achievement={a} />
                   </Reveal>
                 ))
               )}
             </div>
           </div>
-        )}
       </main>
 
       <SiteFooter achievements={achievements} />

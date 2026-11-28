@@ -2,105 +2,126 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { AchievementDTO } from "@/lib/types";
-import { formatDate, matchHash, recordLabel, thumbnailOf } from "@/lib/format";
+import { detailPath, formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 import SiteHeader from "./SiteHeader";
 import SiteFooter, { SiteBackdrop } from "./SiteFooter";
 import Reveal from "./Reveal";
-import MatchDetail from "./MatchDetail";
 import AboutView from "./AboutView";
 import CountUp from "./CountUp";
 import { useLoopPause } from "./useLoopPause";
 
-type View =
-  | { name: "list" }
-  | { name: "detail"; id: number }
-  | { name: "about" };
+type View = { name: "list" } | { name: "about" };
 
-function hashFor(view: View, achievements: AchievementDTO[]): string {
-  if (view.name === "about") return "#about";
-  if (view.name === "detail") {
-    const a = achievements.find((x) => x.id === view.id);
-    return a ? matchHash(a) : "#record";
-  }
-  return "#record";
+function hashFor(view: View): string {
+  return view.name === "about" ? "#about" : "#record";
 }
 
-function viewFromHash(achievements: AchievementDTO[]): View {
+function viewFromHash(): View {
+  return window.location.hash === "#about"
+    ? { name: "about" }
+    : { name: "list" };
+}
+
+// Old in-page match links (#creators-001 / #ordinary-001, and the
+// legacy #match-002 from before per-record numbering) no longer open
+// an in-page view: each match lives on its own page now, so a hash
+// naming a match resolves to that record and the caller redirects to
+// its real URL — old shared links keep working and land on the page
+// they always meant.
+function matchFromHash(achievements: AchievementDTO[]): AchievementDTO | null {
   const h = window.location.hash;
-  if (h === "#about") return { name: "about" };
-  // Current scheme: the slug carries the record as well as the number
-  // (#creators-001 / #ordinary-001) — numbers restart in each record,
-  // so a bare number no longer identifies a match on its own.
   const scoped = h.match(/^#(creators|ordinary)-(\d+)$/);
   if (scoped) {
     const num = parseInt(scoped[2], 10);
-    const a = achievements.find((x) =>
-      scoped[1] === "creators"
-        ? x.category === "CREATOR" && x.matchNumber === num
-        : x.category !== "CREATOR" && x.matchNumber === num,
+    return (
+      achievements.find((x) =>
+        scoped[1] === "creators"
+          ? x.category === "CREATOR" && x.matchNumber === num
+          : x.category !== "CREATOR" && x.matchNumber === num,
+      ) ?? null
     );
-    if (a) return { name: "detail", id: a.id };
   }
-  // Legacy scheme from before per-record numbering (#match-002):
-  // follow the number when exactly one record carries it.
   const legacy = h.match(/^#match-(\d+)$/);
   if (legacy) {
     const num = parseInt(legacy[1], 10);
     const hits = achievements.filter((x) => x.matchNumber === num);
-    if (hits.length === 1) return { name: "detail", id: hits[0].id };
+    if (hits.length === 1) return hits[0];
   }
-  return { name: "list" };
+  return null;
 }
 
 // The home page: hero, match-level stats, results ticker, and a summary
 // entry for each of the two record collections. The full collections
-// live on their own pages (/creators-record, /ordinary-record); match
-// detail and About remain in-page views here so the long-standing hash
-// deep-links (#creators-001, #about) keep working exactly as before.
+// live on their own pages (/creators-record, /ordinary-record), and
+// every match lives on its own page too — opening a match navigates to
+// /creators-record/001 (etc.), never an in-page view, so the address
+// bar always shows the match's real URL. About remains an in-page
+// view (#about); old match hashes (#creators-001) redirect to the
+// match's page.
 export default function PublicSite({
   achievements,
 }: {
   achievements: AchievementDTO[];
 }) {
+  const router = useRouter();
   const [view, setView] = useState<View>({ name: "list" });
   const mainRef = useRef<HTMLElement>(null);
   // Continuous loops pause while their section is off-screen.
   const heroRef = useLoopPause<HTMLElement>();
   const tickerRef = useLoopPause<HTMLDivElement>();
 
-  // Initial view from the URL hash (deep links).
+  // Initial view from the URL hash (deep links). A hash naming a match
+  // goes to that match's own page instead of opening it here.
   useEffect(() => {
-    setView(viewFromHash(achievements));
+    const m = matchFromHash(achievements);
+    if (m) {
+      router.replace(detailPath(m));
+      return;
+    }
+    setView(viewFromHash());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Back/Forward support.
   useEffect(() => {
-    const onPop = () => setView(viewFromHash(achievements));
+    const onPop = () => {
+      const m = matchFromHash(achievements);
+      if (m) {
+        router.replace(detailPath(m));
+        return;
+      }
+      setView(viewFromHash());
+    };
     window.addEventListener("popstate", onPop);
     window.addEventListener("hashchange", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
       window.removeEventListener("hashchange", onPop);
     };
-  }, [achievements]);
+  }, [achievements, router]);
 
   const navigate = useCallback(
     (next: View) => {
       setView(next);
-      const h = hashFor(next, achievements);
+      const h = hashFor(next);
       if (window.location.hash !== h) {
         history.pushState(null, "", h);
       }
       mainRef.current?.scrollIntoView({ block: "start" });
     },
-    [achievements],
+    [],
   );
 
+  // Opening a match goes to the match's own page — its URL is the
+  // shareable one, with its own preview.
   const openMatch = useCallback(
-    (id: number) => navigate({ name: "detail", id }),
-    [navigate],
+    (id: number) => {
+      const a = achievements.find((x) => x.id === id);
+      if (a) router.push(detailPath(a));
+    },
+    [achievements, router],
   );
   const goList = useCallback(() => navigate({ name: "list" }), [navigate]);
   const goAbout = useCallback(() => navigate({ name: "about" }), [navigate]);
@@ -115,11 +136,6 @@ export default function PublicSite({
     () => achievements.filter((a) => a.category !== "CREATOR"),
     [achievements],
   );
-
-  const selected =
-    view.name === "detail"
-      ? achievements.find((a) => a.id === view.id) ?? null
-      : null;
 
   // Hero stats (count-up) and the results ticker — both derived from the
   // same record data the cards show; nothing here is new copy, just the
@@ -302,34 +318,6 @@ export default function PublicSite({
               divided
               className="pb-16 sm:pb-20"
             />
-          </div>
-        )}
-
-        {view.name === "detail" && (
-          <div
-            key={`detail-${view.id}`}
-            className="view-enter mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8"
-          >
-            {selected ? (
-              <MatchDetail achievement={selected} onBack={goList} />
-            ) : (
-              <div className="border border-dashed border-linestrong bg-raise px-6 py-14 text-center">
-                <p className="font-condensed text-3xl font-bold uppercase">
-                  That match is no longer on record
-                </p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">
-                  It may have been removed from the archive. The full record is
-                  still there — head back and pick another record.
-                </p>
-                <button
-                  type="button"
-                  onClick={goList}
-                  className="mt-6 inline-flex min-h-11 items-center border border-linestrong px-5 font-condensed text-base font-semibold uppercase tracking-wider transition hover:border-brand hover:text-brand"
-                >
-                  Back to the record
-                </button>
-              </div>
-            )}
           </div>
         )}
 
