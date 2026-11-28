@@ -179,6 +179,31 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
         </div>
       )}
 
+      {/* Opponent Discord bar — same pattern as the channel bar, only
+          when a Discord link is on file. Sits right under the channel
+          bar when both exist, otherwise in its place. */}
+      {a.opponentDiscordUrl && (
+        <div
+          className={`anim-fade-rise flex flex-wrap items-center gap-3 border border-line bg-card px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4 ${
+            a.opponentChannelUrl ? "mt-3 sm:mt-4" : "mt-6 sm:mt-8"
+          }`}
+          style={{ "--anim-delay": "160ms" } as React.CSSProperties}
+        >
+          <span className="live-dot shrink-0" aria-hidden />
+          <p className="min-w-0 flex-1 font-condensed text-lg font-semibold uppercase sm:text-xl">
+            {a.opponent} <span className="text-ink/40">— Discord</span>
+          </p>
+          <a
+            href={a.opponentDiscordUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center bg-brand px-4 font-condensed text-sm font-bold uppercase tracking-wider text-white transition hover:bg-branddeep sm:px-5 sm:text-base"
+          >
+            Visit Discord →
+          </a>
+        </div>
+      )}
+
       {/* Per-game breakdown */}
       <div
         className="anim-fade-rise"

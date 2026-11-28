@@ -67,6 +67,10 @@ export default async function DeleteAchievementPage({
                 label="Opponent channel"
                 value={a.opponentChannelUrl ? "On file" : "None"}
               />
+              <Item
+                label="Opponent Discord"
+                value={a.opponentDiscordUrl ? "On file" : "None"}
+              />
             </dl>
           </div>
         </div>

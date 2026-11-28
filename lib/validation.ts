@@ -86,6 +86,16 @@ export const achievementInputSchema = z
         (v) => v === null || /^https?:\/\//i.test(v),
         "Channel link must be a full http(s) URL",
       ),
+    opponentDiscordUrl: z
+      .string()
+      .trim()
+      .max(2048)
+      .optional()
+      .transform((v) => (v ? v : null))
+      .refine(
+        (v) => v === null || /^https?:\/\//i.test(v),
+        "Discord link must be a full http(s) URL",
+      ),
     result: z.enum(RESULTS),
     // Which of the two collections the record is filed under. Defaults to
     // Ordinary so any payload that predates the split still validates.

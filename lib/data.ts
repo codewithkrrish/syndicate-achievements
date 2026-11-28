@@ -11,6 +11,7 @@ function toDTO(a: {
   matchNumber: number;
   opponent: string;
   opponentChannelUrl: string | null;
+  opponentDiscordUrl: string | null;
   result: string;
   category: string;
   finalScore: string;
@@ -34,6 +35,7 @@ function toDTO(a: {
     matchNumber: a.matchNumber,
     opponent: a.opponent,
     opponentChannelUrl: a.opponentChannelUrl,
+    opponentDiscordUrl: a.opponentDiscordUrl,
     result: a.result,
     category: a.category,
     finalScore: a.finalScore,

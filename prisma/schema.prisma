@@ -22,6 +22,7 @@ model Achievement {
   matchNumber        Int
   opponent           String
   opponentChannelUrl String?
+  opponentDiscordUrl String?
   result             String // "WIN" | "LOSS" (validated in app code)
   category           String @default("ORDINARY") // "CREATOR" | "ORDINARY" (validated in app code)
   finalScore         String // e.g. "2 – 1"

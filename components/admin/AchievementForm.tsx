@@ -175,6 +175,7 @@ export default function AchievementForm({
       matchNumber: num(values.matchNumber),
       opponent: values.opponent,
       opponentChannelUrl: values.opponentChannelUrl,
+      opponentDiscordUrl: values.opponentDiscordUrl,
       result: values.result,
       category: values.category,
       finalScore: values.finalScore,
@@ -302,6 +303,22 @@ export default function AchievementForm({
             <Hint>
               Only paste a channel link you have verified. Leave empty and no
               channel bar appears on the match page.
+            </Hint>
+          </Field>
+          <Field
+            label="Opponent Discord link (optional)"
+            error={err("opponentDiscordUrl")}
+          >
+            <input
+              type="url"
+              value={values.opponentDiscordUrl}
+              onChange={(e) => set("opponentDiscordUrl", e.target.value)}
+              placeholder="https://discord.gg/invite"
+              className={inputCls}
+            />
+            <Hint>
+              Their Discord server invite or profile link. Leave empty and
+              no Discord bar appears on the match page.
             </Hint>
           </Field>
           <Field label="Mode" error={err("mode")}>

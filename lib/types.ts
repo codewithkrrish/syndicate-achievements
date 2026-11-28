@@ -16,6 +16,7 @@ export interface AchievementDTO {
   matchNumber: number;
   opponent: string;
   opponentChannelUrl: string | null;
+  opponentDiscordUrl: string | null;
   result: string; // "WIN" | "LOSS"
   category: string; // "CREATOR" | "ORDINARY"
   finalScore: string;
@@ -33,6 +34,7 @@ export interface AchievementFormValues {
   matchNumber: number | "";
   opponent: string;
   opponentChannelUrl: string;
+  opponentDiscordUrl: string;
   result: string;
   category: string;
   finalScore: string;
@@ -54,6 +56,7 @@ export const EMPTY_FORM: AchievementFormValues = {
   matchNumber: "",
   opponent: "",
   opponentChannelUrl: "",
+  opponentDiscordUrl: "",
   result: "WIN",
   category: "ORDINARY",
   finalScore: "",
