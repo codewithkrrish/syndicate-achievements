@@ -10,17 +10,22 @@ interface Props {
   achievement: AchievementDTO;
 }
 
-// One entry in The Record, laid out exactly like the original static
-// design: thumbnail (decider screenshot) with result badge and score
-// overlay, then the main column (kicker, title, card line, meta grid),
-// then a right side column with the final-score block on top and the
-// View match action at the bottom. The whole card is one link to the
+// One entry in The Record, laid out like the original static design,
+// with one change of our own: a header band across the top carries the
+// record's category + number and its date, so the number reads at a
+// glance. Below it: thumbnail (decider screenshot) with result badge
+// and score overlay, then the main column (title, card line, meta
+// grid), then a right side column with the final-score block on top
+// and the View match action at the bottom. The whole card is one link to the
 // match's own page (/creators-record/001, /ordinary-record/001, ...) —
 // one tap target, no nested interactive elements, and the address bar
 // always shows the match's real, shareable URL.
 export default function RecordCard({ achievement: a }: Props) {
   const thumb = thumbnailOf(a);
   const isWin = a.result === "WIN";
+  // "Creators Record #002" -> name + number, so the header band can
+  // set the number in brand red while the name stays white.
+  const [labelName, labelNum] = recordLabel(a).split("#");
   const articleRef = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -58,6 +63,23 @@ export default function RecordCard({ achievement: a }: Props) {
         className="block w-full text-left"
         aria-label={`View ${recordLabel(a)} against ${a.opponent}`}
       >
+        {/* Header band — the record's identity strip: category + number
+            on the left, the match date on the right. It sits above the
+            photo so the number is the first thing read on the card; the
+            small kicker that used to sit under the thumbnail is gone —
+            one label, one place. */}
+        <div className="flex items-center justify-between gap-3 border-b border-line bg-card px-3.5 py-2 sm:px-[1.15rem] sm:py-2.5">
+          <p className="flex min-w-0 items-center gap-2 font-condensed text-[0.92rem] font-bold uppercase leading-none tracking-[0.14em] sm:text-base">
+            <span aria-hidden className="h-2 w-2 shrink-0 bg-brand" />
+            <span className="truncate">
+              {labelName.trim()}{" "}
+              <span className="text-brand">#{labelNum}</span>
+            </span>
+          </p>
+          <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-ink/45">
+            {formatDate(a.date)}
+          </span>
+        </div>
         <div className="flex flex-col sm:flex-row">
           {/* Thumbnail — 300px wide, matching the original static design;
               full-width 16:9 when stacked on mobile. On desktop (lg+) the
@@ -107,9 +129,6 @@ export default function RecordCard({ achievement: a }: Props) {
 
           {/* Main column */}
           <div className="min-w-0 flex-1 px-3.5 pb-[0.4rem] pt-3.5 sm:px-[1.15rem] sm:pb-[1.1rem] sm:pt-[1.05rem]">
-            <p className="text-[0.66rem] font-bold uppercase tracking-[0.2em] text-brand sm:text-[0.74rem]">
-              {recordLabel(a)}
-            </p>
             <h3 className="mt-1 font-condensed text-[1.55rem] font-bold uppercase leading-none sm:mt-1.5 sm:text-4xl">
               SYNDICATE <span className="text-ink/40">vs</span> {a.opponent}
             </h3>
