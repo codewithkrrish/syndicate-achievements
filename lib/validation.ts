@@ -9,11 +9,29 @@ import { z } from "zod";
 export const RESULTS = ["WIN", "LOSS"] as const;
 export const CATEGORIES = ["CREATOR", "ORDINARY"] as const;
 export const FORMATS = ["BO1", "BO3", "BO5"] as const;
+export const MODES = [
+  "CS [MAC RULES]",
+  "CS [CONTRA]",
+  "CS [LIM]",
+  "CS [UNLIM]",
+] as const;
+// Every official Free Fire map a record can be played on.
+export const MAPS = [
+  "Bermuda",
+  "Bermuda Remastered",
+  "Purgatory",
+  "Kalahari",
+  "Alpine",
+  "NeXTerra",
+  "Solara",
+] as const;
 export const GAME_RESULTS = ["Victory", "Defeat"] as const;
 
 export type Result = (typeof RESULTS)[number];
 export type Category = (typeof CATEGORIES)[number];
 export type Format = (typeof FORMATS)[number];
+export type Mode = (typeof MODES)[number];
+export type MapName = (typeof MAPS)[number];
 export type GameResult = (typeof GAME_RESULTS)[number];
 
 /** The two collections the public record is split into. */

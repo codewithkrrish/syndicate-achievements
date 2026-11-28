@@ -10,6 +10,8 @@ import {
   FORMATS,
   FORMAT_MAX_GAMES,
   GAME_RESULTS,
+  MAPS,
+  MODES,
   RESULTS,
   type Category,
   type Format,
@@ -322,22 +324,43 @@ export default function AchievementForm({
             </Hint>
           </Field>
           <Field label="Mode" error={err("mode")}>
-            <input
-              type="text"
+            <select
               value={values.mode}
               onChange={(e) => set("mode", e.target.value)}
-              placeholder="Clash Squad"
               className={inputCls}
-            />
+            >
+              {/* A mode saved before the dropdown existed stays selectable
+                  as its own option, so editing an old record can never
+                  silently change its mode. */}
+              {values.mode &&
+                !(MODES as readonly string[]).includes(values.mode) && (
+                  <option value={values.mode}>{values.mode} (current)</option>
+                )}
+              {MODES.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Map" error={err("map")}>
-            <input
-              type="text"
+            <select
               value={values.map}
               onChange={(e) => set("map", e.target.value)}
-              placeholder="Bermuda"
               className={inputCls}
-            />
+            >
+              {/* Same guard as Mode: a map saved before the dropdown
+                  existed stays selectable as its own option. */}
+              {values.map &&
+                !(MAPS as readonly string[]).includes(values.map) && (
+                  <option value={values.map}>{values.map} (current)</option>
+                )}
+              {MAPS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
           </Field>
           <div className="sm:col-span-2">
             <Field label="Record category" error={err("category")}>
