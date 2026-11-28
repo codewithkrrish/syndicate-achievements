@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
+import Image from "./SafeImage";
 import type { AchievementDTO, GameDTO } from "@/lib/types";
 import { formatDate, matchNumberPadded, recordLabel } from "@/lib/format";
 import { FORMAT_LABEL, type Format } from "@/lib/validation";
@@ -19,6 +19,21 @@ interface Props {
 export default function MatchDetail({ achievement: a, onBack }: Props) {
   const [lightbox, setLightbox] = useState<GameDTO | null>(null);
   const [closing, setClosing] = useState(false);
+  // The lightbox opens the original full-size screenshot directly (no
+  // optimizer in between), so it heals the same way SafeImage does: a
+  // failed load retries with a fresh query instead of staying broken
+  // until the viewer is closed and reopened.
+  const [lbAttempt, setLbAttempt] = useState(0);
+  const lbTimer = useRef<number | null>(null);
+  useEffect(() => {
+    setLbAttempt(0);
+  }, [lightbox]);
+  useEffect(
+    () => () => {
+      if (lbTimer.current) window.clearTimeout(lbTimer.current);
+    },
+    [],
+  );
   const closeTimer = useRef<number | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   // The scoreline's loops (flow border, chip shine, filed-dot pulse)
@@ -310,13 +325,25 @@ export default function MatchDetail({ achievement: a, onBack }: Props) {
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={lightbox.screenshotUrl}
+            src={
+              lbAttempt === 0
+                ? lightbox.screenshotUrl
+                : `${lightbox.screenshotUrl}${lightbox.screenshotUrl.includes("?") ? "&" : "?"}synretry=${lbAttempt}`
+            }
             alt={`Game ${lightbox.gameNumber} result screen, large`}
             className={`min-h-0 flex-1 object-contain ${
               closing ? "lightbox-img-out" : "lightbox-img-in"
             }`}
             decoding="async"
             onClick={(e) => e.stopPropagation()}
+            onError={() => {
+              if (lbAttempt < 2) {
+                lbTimer.current = window.setTimeout(
+                  () => setLbAttempt((a) => a + 1),
+                  500 * (lbAttempt + 1),
+                );
+              }
+            }}
           />
           </div>,
           document.body,

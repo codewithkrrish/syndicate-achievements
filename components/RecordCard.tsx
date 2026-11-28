@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import Image from "./SafeImage";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 

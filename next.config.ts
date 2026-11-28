@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: {
+    // Cap the generated variants at 1920w: the defaults run to 3840w,
+    // and transcoding a near-4K variant from a database-stored source is
+    // the slowest, most failure-prone first load on the site (the inline
+    // views never display wider than ~1152px, and the lightbox opens the
+    // original full-size file, so nothing visible is lost).
+    deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920],
     // Screenshots are served from the DB route (/api/images, same-origin)
     // or pasted by the admin as external https URLs; the optimizer must
     // accept both, so any https host is allowed (records are written by
