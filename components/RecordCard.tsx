@@ -58,10 +58,16 @@ export default function RecordCard({ achievement: a, onOpen }: Props) {
         aria-label={`View ${recordLabel(a)} against ${a.opponent}`}
       >
         <div className="flex flex-col sm:flex-row">
-          {/* Thumbnail — fixed box matching the original static design:
-              300×188px on desktop, full-width 16:9 when stacked on mobile.
-              The frame owns the size; it never stretches with the body. */}
-          <div className="relative aspect-video w-full shrink-0 self-start overflow-hidden sm:aspect-auto sm:h-[188px] sm:w-[300px]">
+          {/* Thumbnail — 300px wide, matching the original static design;
+              full-width 16:9 when stacked on mobile. On desktop (lg+) the
+              frame stretches to the card row's full height: the body
+              column renders ~5px taller than the old fixed 188px frame,
+              which left a thin empty strip of card background under the
+              photo. Stretching removes only that strip — the photo's
+              crop shifts by those same ~5px, and no text moves. Below
+              lg the meta grid wraps to two rows and the row runs far
+              taller, so the fixed 188px frame stays there. */}
+          <div className="relative aspect-video w-full shrink-0 self-start overflow-hidden sm:aspect-auto sm:h-[188px] sm:w-[300px] lg:h-auto lg:self-stretch">
             {thumb ? (
               // next/image: the optimizer serves a right-sized WebP/AVIF
               // variant of the screenshot (full-size originals stay behind
