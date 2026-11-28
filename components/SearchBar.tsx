@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import SafeImage from "./SafeImage";
 import type { AchievementDTO } from "@/lib/types";
 import { formatDate, recordLabel, thumbnailOf } from "@/lib/format";
 
@@ -178,12 +179,17 @@ export default function SearchBar({
                   }`}
                 >
                   {thumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    // Through SafeImage like every other screenshot on
+                    // the site: the dropdown used to download the full
+                    // original file for an 80px thumb; now it gets a
+                    // right-sized, quality-90 optimized copy (with the
+                    // same self-healing retries).
+                    <SafeImage
                       src={thumb}
                       alt=""
+                      width={160}
+                      height={90}
                       className="aspect-video w-20 shrink-0 border border-line object-cover"
-                      loading="lazy"
                     />
                   ) : (
                     <span className="aspect-video w-20 shrink-0 border border-line bg-raise" />

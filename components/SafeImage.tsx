@@ -15,7 +15,21 @@ import { useEffect, useRef, useState } from "react";
 // instead of repeating a cached failure), then fall back to the
 // original full-size source served directly. Only a source that is
 // itself unreachable leaves the frame empty.
-export default function SafeImage({ src, onError, ...rest }: ImageProps) {
+//
+// Compression rule (Krrish's standing instruction, 2026-11-28): every
+// screenshot — uploaded to the database or pasted as an external URL —
+// is displayed through the optimizer, so files shrink automatically,
+// but the ORIGINALS are never altered (uploads stay byte-identical in
+// the database, URL images stay at their source, and the lightbox
+// opens the untouched original). The optimizer quality defaults to 90
+// here so the displayed copy stays visually identical to the original
+// — scoreboard text included — while still weighing far less.
+export default function SafeImage({
+  src,
+  onError,
+  quality,
+  ...rest
+}: ImageProps) {
   const [attempt, setAttempt] = useState(0);
   const timer = useRef<number | null>(null);
 
@@ -44,6 +58,7 @@ export default function SafeImage({ src, onError, ...rest }: ImageProps) {
   return (
     <Image
       src={attemptSrc}
+      quality={quality ?? 90}
       unoptimized={attempt >= 3}
       onError={(e) => {
         onError?.(e);
