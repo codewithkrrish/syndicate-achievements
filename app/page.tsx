@@ -1,5 +1,27 @@
+import type { Metadata } from "next";
 import { getAchievements } from "@/lib/data";
 import PublicSite from "@/components/PublicSite";
+
+// The home page's own share card: its title and description, with the
+// generated preview image from app/opengraph-image.tsx (the layout's
+// generic hero image stays as the fallback for routes without one).
+const HOME_DESCRIPTION =
+  "The official achievement archive of the SYNDICATE Free Fire guild — every guild-vs-guild match on record, with scores and screenshots for every game.";
+
+export const metadata: Metadata = {
+  openGraph: {
+    type: "website",
+    siteName: "SYNDICATE Achievements",
+    title: "SYNDICATE Achievements — Official Match Archive",
+    description: HOME_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SYNDICATE Achievements — Official Match Archive",
+    description: HOME_DESCRIPTION,
+  },
+};
 
 // The archive is cached and revalidated at most every 60 seconds (ISR).
 // Admin edits call revalidatePath("/") (see app/admin/actions.ts), so an
