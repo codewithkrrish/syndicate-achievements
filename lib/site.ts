@@ -92,35 +92,3 @@ Instagram: ${GUILD.instagramUrl}`;
 
 /** The fixed card-line pattern, shown as a hint in the admin form. */
 export const CARD_LINE_PATTERN = "Went the distance — SYNDICATE beat [OPPONENT].";
-
-/**
- * Ready-made card lines for the admin form's style selector, grouped
- * by how the series went. The [OPPONENT] placeholder is replaced with
- * the opponent's name when a style is picked, so the saved line always
- * names the real opponent — the same fill-in the form has always done
- * for the default pattern.
- */
-export const CARD_LINE_PRESETS: {
-  group: string;
-  label: string;
-  pattern: string;
-}[] = [
-  { group: "Clean sweep", label: "Clean sweep", pattern: "Clean sweep — SYNDICATE beat [OPPONENT]." },
-  { group: "Clean sweep", label: "Straight sets", pattern: "Straight sets — SYNDICATE beat [OPPONENT]." },
-  { group: "Clean sweep", label: "Never in doubt", pattern: "Never in doubt — SYNDICATE beat [OPPONENT]." },
-  { group: "Clean sweep", label: "Flawless finish", pattern: "Flawless finish — SYNDICATE beat [OPPONENT]." },
-  { group: "Went the distance", label: "Went the distance", pattern: "Went the distance — SYNDICATE beat [OPPONENT]." },
-  { group: "Went the distance", label: "Down to the wire", pattern: "Down to the wire — SYNDICATE beat [OPPONENT]." },
-  { group: "Went the distance", label: "The hard way", pattern: "The hard way — SYNDICATE beat [OPPONENT]." },
-  { group: "Went the distance", label: "Last-game heroes", pattern: "Last-game heroes — SYNDICATE beat [OPPONENT]." },
-  { group: "One-game series", label: "One and done", pattern: "One and done — SYNDICATE beat [OPPONENT]." },
-  { group: "One-game series", label: "One shot, one win", pattern: "One shot, one win — SYNDICATE beat [OPPONENT]." },
-  { group: "One-game series", label: "First and final", pattern: "First and final — SYNDICATE beat [OPPONENT]." },
-  { group: "In defeat", label: "A rare stumble", pattern: "A rare stumble — [OPPONENT] edged SYNDICATE." },
-  { group: "In defeat", label: "So close", pattern: "So close — [OPPONENT] took it at the wire." },
-];
-
-/** Fill a card-line pattern's [OPPONENT] placeholder with a real name. */
-export function cardLineFromPattern(pattern: string, opponent: string): string {
-  return pattern.split("[OPPONENT]").join(opponent);
-}
