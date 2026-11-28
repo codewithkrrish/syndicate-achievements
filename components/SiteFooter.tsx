@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { AchievementDTO } from "@/lib/types";
 import { GUILD } from "@/lib/site";
 import { recordLabel } from "@/lib/format";
@@ -89,9 +90,9 @@ export default function SiteFooter({
               About Us
             </button>
           ) : (
-            <a href="/#about" className={linkCls}>
+            <Link href="/#about" className={linkCls}>
               About Us
-            </a>
+            </Link>
           )}
           <button
             type="button"

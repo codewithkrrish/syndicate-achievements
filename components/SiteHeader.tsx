@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 export type NavKey = "creators" | "ordinary" | "about";
 
@@ -122,9 +123,9 @@ export default function SiteHeader({
             {brandInner}
           </button>
         ) : (
-          <a href="/" className={brandCls} aria-label="SYNDICATE Achievements — home">
+          <Link href="/" className={brandCls} aria-label="SYNDICATE Achievements — home">
             {brandInner}
-          </a>
+          </Link>
         )}
         {/* The two record collections + About. On phones the three
             longer labels get their own row under the brand — one line
@@ -176,10 +177,13 @@ function NavItem({
   );
   if (href) {
     return (
-      <a href={href} className={cls} aria-current={active ? "page" : undefined}>
+      // A real Next Link, not a plain anchor: the destination is
+      // prefetched while it sits on screen, so the tap swaps pages
+      // in place instead of reloading the whole site every time.
+      <Link href={href} className={cls} aria-current={active ? "page" : undefined}>
         {children}
         {underline}
-      </a>
+      </Link>
     );
   }
   return (

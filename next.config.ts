@@ -26,6 +26,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    // Client router cache: a page the visitor has already opened is
+    // kept for a minute, so going back and forth between the archive
+    // and a match is instant instead of a fresh server round-trip
+    // every tap. 60s matches the public pages' own revalidation
+    // rhythm — nothing on this site changes faster than that outside
+    // the admin panel, and admin actions invalidate the cache anyway.
+    staleTimes: { dynamic: 60, static: 300 },
+  },
   images: {
     // Cap the generated variants at 1920w: the defaults run to 3840w,
     // and transcoding a near-4K variant from a database-stored source is

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AchievementDTO } from "@/lib/types";
 import { detailPath, formatDate, recordLabel, thumbnailOf } from "@/lib/format";
@@ -440,12 +441,12 @@ function CategorySummary({
               {records.length}{" "}
               {records.length === 1 ? "record" : "records"} filed
             </span>
-            <a
+            <Link
               href={href}
               className="ml-auto font-condensed text-sm font-bold uppercase tracking-wider text-brand transition hover:text-[#ff6b66] sm:text-base"
             >
               View the {title} →
-            </a>
+            </Link>
           </div>
         </div>
       </Reveal>
